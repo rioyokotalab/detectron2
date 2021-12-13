@@ -1,3 +1,12 @@
+# extra
+jobs/
+*.out
+*.log
+*.o*
+
+# pyenv
+.python-version
+
 # output dir
 output
 instant_test_output
