@@ -17,15 +17,44 @@ import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
 from detectron2.data import DatasetMapper, MetadataCatalog, build_detection_train_loader
-from detectron2.engine import DefaultTrainer, default_argument_parser, default_setup, launch
-from detectron2.evaluation import CityscapesSemSegEvaluator, DatasetEvaluators, SemSegEvaluator
+from detectron2.engine import (
+    DefaultTrainer,
+    default_argument_parser,
+    default_setup,
+    launch,
+)
+from detectron2.evaluation import (
+    CityscapesSemSegEvaluator,
+    DatasetEvaluators,
+    SemSegEvaluator,
+)
 from detectron2.projects.deeplab import add_deeplab_config, build_lr_scheduler
+
+
+def checkpoint2model(checkpoint):
+    state_dict = {}
+    for k in checkpoint["state_dict"].keys():
+        if "model." in k:
+            state_dict[k.replace("model.", "")] = checkpoint["state_dict"][k]
+    return state_dict
+
+
+def partial_load(model, state_dict):
+    model_dict = model.state_dict()
+    state_dict = {k: v for k, v in state_dict.items() if k in model_dict.keys()}
+    print("# of match keys for state dict:", len(list(state_dict.keys())))
+    # print("match keys:", list(state_dict.keys()))
+    model_dict.update(state_dict)
+    model.load_state_dict(model_dict)
+    return model
 
 
 def build_sem_seg_train_aug(cfg):
     augs = [
         T.ResizeShortestEdge(
-            cfg.INPUT.MIN_SIZE_TRAIN, cfg.INPUT.MAX_SIZE_TRAIN, cfg.INPUT.MIN_SIZE_TRAIN_SAMPLING
+            cfg.INPUT.MIN_SIZE_TRAIN,
+            cfg.INPUT.MAX_SIZE_TRAIN,
+            cfg.INPUT.MIN_SIZE_TRAIN_SAMPLING,
         )
     ]
     if cfg.INPUT.CROP.ENABLED:
@@ -61,8 +90,13 @@ class Trainer(DefaultTrainer):
         pretrain_encoder_path = cfg.MODEL.BACKBONE.PRETRAIN_PATH
         model = build_model(cfg)
         if pretrain_encoder_path != "":
-            model.backbone.load_state_dict(torch.load(pretrain_encoder_path, map_location="cpu"))
-
+            checkpoint = torch.load(pretrain_encoder_path, map_location="cpu")
+            if checkpoint.get("state_dict"):
+                model.backbone = partial_load(
+                    model.backbone, checkpoint2model(checkpoint)
+                )
+            else:
+                model.backbone = partial_load(model.backbone, checkpoint)
         logger = logging.getLogger(__name__)
         logger.info("Model:\n{}".format(model))
         return model
@@ -103,7 +137,9 @@ class Trainer(DefaultTrainer):
     @classmethod
     def build_train_loader(cls, cfg):
         if "SemanticSegmentor" in cfg.MODEL.META_ARCHITECTURE:
-            mapper = DatasetMapper(cfg, is_train=True, augmentations=build_sem_seg_train_aug(cfg))
+            mapper = DatasetMapper(
+                cfg, is_train=True, augmentations=build_sem_seg_train_aug(cfg)
+            )
         else:
             mapper = None
         return build_detection_train_loader(cfg, mapper=mapper)
@@ -122,11 +158,14 @@ def setup(args):
     Create configs and perform basic setups.
     """
     cfg = get_cfg()
-    cfg.OUPUT_DIR = args.output
-    cfg.MODEL.BACKBONE.PRETRAIN_PATH = args.model_path
     add_deeplab_config(cfg)
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
+    cfg.OUTPUT_DIR = args.output
+    # cfg.MODEL.WEIGHTS = args.model_path
+    cfg.MODEL.BACKBONE.PRETRAIN_PATH = args.model_path
+    if args.no_finetune:
+        cfg.MODEL.BACKBONE.FREEZE_AT = 5
     cfg.freeze()
     default_setup(cfg, args)
     return cfg
@@ -152,6 +191,7 @@ if __name__ == "__main__":
     parser = default_argument_parser()
     parser.add_argument("--output", default="./output")
     parser.add_argument("--model_path", default="")
+    parser.add_argument("--no_finetune", action="store_true")
     args = parser.parse_args()
     print("Command Line Args:", args)
     launch(
