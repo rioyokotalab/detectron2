@@ -1,5 +1,6 @@
 import argparse
 import os
+import pickle
 
 import torch
 
@@ -71,20 +72,34 @@ def checkpoint2detectron(checkpoint):
 
 
 if __name__ == "__main__":
+    ext_torch_list = [".pth", ".pth.tar", ".pyth"]
+    ext_pickle_list = [".pkl", ".binaryfile"]
+    ext_list = ext_torch_list + ext_pickle_list
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_path", default="")
     parser.add_argument("--out_path", default="./output/new_checkpoint")
+    parser.add_argument("--ext", default=".pth", choices=ext_list)
     args = parser.parse_args()
+
     pretrain_encoder_path = args.model_path
     out_path = args.out_path
     os.makedirs(out_path, exist_ok=True)
+
     checkpoint = torch.load(pretrain_encoder_path, map_location="cpu")
     checkpoint = checkpoint2detectron(checkpoint)
+
     filename_pth_tar = os.path.basename(pretrain_encoder_path)
     dirname, basename = os.path.split(filename_pth_tar)
     basename_without_ext, ext = basename.split(".", 1)
     path_without_ext = os.path.join(dirname, basename_without_ext)
     print(path_without_ext)
+    save_name_ext = args.ext
+    save_name = path_without_ext + "{save_name_ext}"
     # new_checkpoint_file_path = os.path.join(out_path, f"{path_without_ext}.pyth")
-    new_checkpoint_file_path = os.path.join(out_path, f"{path_without_ext}.pth")
-    torch.save(checkpoint, new_checkpoint_file_path)
+    new_checkpoint_file_path = os.path.join(out_path, f"{path_without_ext}")
+    if save_name_ext in ext_torch_list:
+        torch.save(checkpoint, new_checkpoint_file_path)
+    elif save_name_ext in ext_pickle_list:
+        with open(new_checkpoint_file_path, "wb") as f:
+            pickle.dump(checkpoint, f)
