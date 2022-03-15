@@ -50,8 +50,8 @@ def change_downsamplename(key):
 
 
 def checkpoint2detectron(checkpoint):
-    state_dict = {}
-    # state_dict["model_state"] = {}
+    state_dict = {"__author__": "tomo", "matching_heuristics": True}
+    state_dict["model"] = {}
     for k in checkpoint["state_dict"].keys():
         if "model." in k:
             new_k = k.replace("model.", "")
@@ -67,7 +67,7 @@ def checkpoint2detectron(checkpoint):
             if "bn" in new_k:
                 new_k = change_bn_name(new_k)
             # state_dict["model_state"][new_k] = checkpoint["state_dict"][k]
-            state_dict[new_k] = checkpoint["state_dict"][k]
+            state_dict["model"][new_k] = checkpoint["state_dict"][k]
     return state_dict
 
 
