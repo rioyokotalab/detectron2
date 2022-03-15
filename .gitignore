@@ -3,6 +3,12 @@ jobs/
 *.out
 *.log
 *.o*
+tmp_out/
+tmp/
+result/
+results/
+results_root/
+pretrain_models/
 
 # pyenv
 .python-version
