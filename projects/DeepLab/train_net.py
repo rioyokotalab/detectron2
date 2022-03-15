@@ -66,7 +66,7 @@ def build_sem_seg_train_aug(cfg):
                 cfg.MODEL.SEM_SEG_HEAD.IGNORE_VALUE,
             )
         )
-    augs.append(T.RandomFlip())
+    # augs.append(T.RandomFlip())
     return augs
 
 
@@ -77,29 +77,6 @@ class Trainer(DefaultTrainer):
     are working on a new research project. In that case you can use the cleaner
     "SimpleTrainer", or write your own training loop.
     """
-
-    @classmethod
-    def build_model(cls, cfg):
-        """
-        Returns:
-            torch.nn.Module:
-
-        It now calls :func:`detectron2.modeling.build_model`.
-        Overwrite it if you'd like a different model.
-        """
-        pretrain_encoder_path = cfg.MODEL.BACKBONE.PRETRAIN_PATH
-        model = build_model(cfg)
-        if pretrain_encoder_path != "":
-            checkpoint = torch.load(pretrain_encoder_path, map_location="cpu")
-            if checkpoint.get("state_dict"):
-                model.backbone = partial_load(
-                    model.backbone, checkpoint2model(checkpoint)
-                )
-            else:
-                model.backbone = partial_load(model.backbone, checkpoint)
-        logger = logging.getLogger(__name__)
-        logger.info("Model:\n{}".format(model))
-        return model
 
     @classmethod
     def build_evaluator(cls, cfg, dataset_name, output_folder=None):
@@ -162,8 +139,8 @@ def setup(args):
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.OUTPUT_DIR = args.output
-    # cfg.MODEL.WEIGHTS = args.model_path
-    cfg.MODEL.BACKBONE.PRETRAIN_PATH = args.model_path
+    cfg.MODEL.WEIGHTS = args.model_path
+
     if args.no_finetune:
         cfg.MODEL.BACKBONE.FREEZE_AT = 5
     cfg.freeze()

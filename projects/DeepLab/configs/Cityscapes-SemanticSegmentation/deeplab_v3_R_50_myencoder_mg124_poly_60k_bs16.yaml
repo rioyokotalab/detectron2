@@ -1,9 +1,9 @@
 _BASE_: Base-DeepLabV3-myencoder-Semantic.yaml
 MODEL:
-  WEIGHTS: "detectron2://ImageNetPretrained/torchvision/R-50.pkl"
   # WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
-  PIXEL_MEAN: [123.675, 116.280, 103.530]
-  PIXEL_STD: [58.395, 57.120, 57.375]
+  # WEIGHTS: "detectron2://ImageNetPretrained/torchvision/R-50.pkl"
+  # PIXEL_MEAN: [123.675, 116.280, 103.530]
+  # PIXEL_STD: [58.395, 57.120, 57.375]
   BACKBONE:
     NAME: "build_resnet_deeplab_backbone"
   RESNETS:
@@ -18,7 +18,7 @@ MODEL:
     NORM: "SyncBN"
 SOLVER:
   BASE_LR: 0.02
-  MAX_ITER: 90000
+  MAX_ITER: 60000
   LR_SCHEDULER_NAME: "WarmupPolyLR"
   IMS_PER_BATCH: 16
 INPUT:
