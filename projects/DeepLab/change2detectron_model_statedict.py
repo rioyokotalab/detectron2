@@ -95,7 +95,7 @@ if __name__ == "__main__":
     path_without_ext = os.path.join(dirname, basename_without_ext)
     print(path_without_ext)
     save_name_ext = args.ext
-    save_name = path_without_ext + "{save_name_ext}"
+    save_name = path_without_ext + f"{save_name_ext}"
     print("save as:", save_name)
     # new_checkpoint_file_path = os.path.join(out_path, f"{path_without_ext}.pyth")
     new_checkpoint_file_path = os.path.join(out_path, f"{save_name}")
