@@ -139,7 +139,8 @@ def setup(args):
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.OUTPUT_DIR = args.output
-    cfg.MODEL.WEIGHTS = args.model_path
+    if args.model_path != "":
+        cfg.MODEL.WEIGHTS = args.model_path
 
     if args.no_finetune:
         cfg.MODEL.BACKBONE.FREEZE_AT = 5
