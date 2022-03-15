@@ -8,10 +8,8 @@ This script is a simplified version of the training script in detectron2/tools.
 """
 
 import os
-import logging
 import torch
 
-from detectron2.modeling import build_model
 import detectron2.data.transforms as T
 import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
