@@ -96,8 +96,9 @@ if __name__ == "__main__":
     print(path_without_ext)
     save_name_ext = args.ext
     save_name = path_without_ext + "{save_name_ext}"
+    print("save as:", save_name)
     # new_checkpoint_file_path = os.path.join(out_path, f"{path_without_ext}.pyth")
-    new_checkpoint_file_path = os.path.join(out_path, f"{path_without_ext}")
+    new_checkpoint_file_path = os.path.join(out_path, f"{save_name}")
     if save_name_ext in ext_torch_list:
         torch.save(checkpoint, new_checkpoint_file_path)
     elif save_name_ext in ext_pickle_list:
