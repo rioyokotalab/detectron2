@@ -58,7 +58,7 @@ def _get_bdd100k_metadata():
     }
 
 
-def _get_bdd100k_files(image_dir, label_dir):
+def _get_bdd100k_files(image_dir, mask_dir):
     files = []
     # scan through the directory
     videos = PathManager.ls(image_dir)
@@ -70,25 +70,25 @@ def _get_bdd100k_files(image_dir, label_dir):
         assert basename.endswith(suffix), basename
         basename = basename[: -len(suffix)]
 
-        label_file = os.path.join(label_dir, basename + ".png")
+        mask_file = os.path.join(mask_dir, basename + ".png")
 
-        files.append((image_file, label_file))
+        files.append((image_file, mask_file))
     assert len(files), "No images found in {}".format(image_dir)
     for f in files[0]:
         assert PathManager.isfile(f), f
     return files
 
 
-def load_bdd100k_semantic(image_dir, label_dir):
+def load_bdd100k_semantic(image_dir, mask_dir):
     ret = []
     # gt_dir is small and contain many small files. make sense to fetch to local first
-    label_dir = PathManager.get_local_path(label_dir)
-    for image_file, label_file in _get_bdd100k_files(image_dir, label_dir):
+    mask_dir = PathManager.get_local_path(mask_dir)
+    for image_file, mask_file in _get_bdd100k_files(image_dir, mask_dir):
         ret.append(
             {
                 "file_name": image_file,
                 "image_id": os.path.basename(image_file),
-                "sem_seg_file_name": label_file,
+                "sem_seg_file_name": mask_file,
                 "height": 720,
                 "width": 1280,
             }
@@ -101,21 +101,27 @@ def register_bdd100k(root):
     SPLITS = {
         "bdd100k_sem_seg_train": (
             "bdd100k/seg/images/train/",
-            "bdd100k/seg/labels/train/",
+            # "bdd100k/seg/labels/train/",
+            "bdd100k/seg/masks/train/",
         ),
-        "bdd100k_sem_seg_val": ("bdd100k/seg/images/val/", "bdd100k/seg/labels/val/"),
+        "bdd100k_sem_seg_val": (
+            "bdd100k/seg/images/val/",
+            # "bdd100k/seg/labels/val",
+            "bdd100k/seg/masks/val/",
+        ),
     }
-    for key, (image_dir, label_dir) in SPLITS.items():
+    for key, (image_dir, mask_dir) in SPLITS.items():
         meta = _get_bdd100k_metadata()
         image_dir = os.path.join(root, image_dir)
-        label_dir = os.path.join(root, label_dir)
+        mask_dir = os.path.join(root, mask_dir)
 
         DatasetCatalog.register(
-            key, lambda x=image_dir, y=label_dir: load_bdd100k_semantic(x, y)
+            key, lambda x=image_dir, y=mask_dir: load_bdd100k_semantic(x, y)
         )
         MetadataCatalog.get(key).set(
             image_dir=image_dir,
-            label_dir=label_dir,
+            label_dir=mask_dir,
+            # label_dir=label_dir,
             evaluator_type="sem_seg",
             ignore_label=255,
             **meta,
