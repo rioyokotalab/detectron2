@@ -9,10 +9,10 @@ MODEL:
   RESNETS:
     DEPTH: 50
     NORM: "SyncBN"
-    # RES5_MULTI_GRID: [1, 2, 4]
+    RES5_MULTI_GRID: [1, 2, 4]
     STEM_TYPE: "basic"
     # STEM_OUT_CHANNELS: 128
-    # STRIDE_IN_1X1: False
+    STRIDE_IN_1X1: False
   SEM_SEG_HEAD:
     NAME: "DeepLabV3Head"
     NORM: "SyncBN"

@@ -64,7 +64,8 @@ def build_sem_seg_train_aug(cfg):
                 cfg.MODEL.SEM_SEG_HEAD.IGNORE_VALUE,
             )
         )
-    # augs.append(T.RandomFlip())
+    if cfg.INPUT.FLIP.ENABLED:
+        augs.append(T.RandomFlip())
     return augs
 
 
@@ -139,9 +140,9 @@ def setup(args):
     cfg.OUTPUT_DIR = args.output
     if args.model_path != "":
         cfg.MODEL.WEIGHTS = args.model_path
-
     if args.no_finetune:
         cfg.MODEL.BACKBONE.FREEZE_AT = 5
+    cfg.INPUT.FLIP.ENABLED = args.use_flip
     cfg.freeze()
     default_setup(cfg, args)
     return cfg
@@ -168,6 +169,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", default="./output")
     parser.add_argument("--model_path", default="")
     parser.add_argument("--no_finetune", action="store_true")
+    parser.add_argument("--use_flip", action="store_true")
     args = parser.parse_args()
     print("Command Line Args:", args)
     launch(
