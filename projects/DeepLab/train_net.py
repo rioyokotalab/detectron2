@@ -64,7 +64,7 @@ def build_sem_seg_train_aug(cfg):
                 cfg.MODEL.SEM_SEG_HEAD.IGNORE_VALUE,
             )
         )
-    if cfg.INPUT.FLIP.ENABLED:
+    if cfg.INPUT.FLIP_ENABLED:
         augs.append(T.RandomFlip())
     return augs
 
@@ -142,7 +142,7 @@ def setup(args):
         cfg.MODEL.WEIGHTS = args.model_path
     if args.no_finetune:
         cfg.MODEL.BACKBONE.FREEZE_AT = 5
-    cfg.INPUT.FLIP.ENABLED = args.use_flip
+    cfg.INPUT.FLIP_ENABLED = args.use_flip
     cfg.freeze()
     default_setup(cfg, args)
     return cfg
