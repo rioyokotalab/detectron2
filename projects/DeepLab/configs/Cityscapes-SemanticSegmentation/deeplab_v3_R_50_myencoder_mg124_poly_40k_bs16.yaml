@@ -1,0 +1,25 @@
+_BASE_: Base-DeepLabV3-myencoder-Semantic.yaml
+MODEL:
+  # WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+  # WEIGHTS: "detectron2://ImageNetPretrained/torchvision/R-50.pkl"
+  # PIXEL_MEAN: [123.675, 116.280, 103.530]
+  # PIXEL_STD: [58.395, 57.120, 57.375]
+  BACKBONE:
+    NAME: "build_resnet_deeplab_backbone"
+  RESNETS:
+    DEPTH: 50
+    NORM: "SyncBN"
+    RES5_MULTI_GRID: [1, 2, 4]
+    STEM_TYPE: "basic"
+    # STEM_OUT_CHANNELS: 128
+    STRIDE_IN_1X1: False
+  SEM_SEG_HEAD:
+    NAME: "DeepLabV3Head"
+    NORM: "SyncBN"
+SOLVER:
+  BASE_LR: 0.01
+  MAX_ITER: 40000
+  LR_SCHEDULER_NAME: "WarmupPolyLR"
+  IMS_PER_BATCH: 8 
+INPUT:
+  FORMAT: "RGB"
