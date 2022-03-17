@@ -1,6 +1,9 @@
 import os
 import logging
 
+import numpy as np
+from PIL import Image
+
 from detectron2.data import DatasetCatalog
 from detectron2.data import MetadataCatalog
 from detectron2.utils.file_io import PathManager
@@ -84,13 +87,17 @@ def load_bdd100k_semantic(image_dir, mask_dir):
     # gt_dir is small and contain many small files. make sense to fetch to local first
     mask_dir = PathManager.get_local_path(mask_dir)
     for image_file, mask_file in _get_bdd100k_files(image_dir, mask_dir):
+        sem_seg_mask = np.array(Image.open(mask_file))
+        h, w = sem_seg_mask.shape[-2:]
+        if h != 720 and w != 1280:
+            print(image_file, mask_file, sem_seg_mask.shape)
         ret.append(
             {
                 "file_name": image_file,
                 "image_id": os.path.basename(image_file),
                 "sem_seg_file_name": mask_file,
-                "height": 720,
-                "width": 1280,
+                "height": sem_seg_mask.shape[-2],
+                "width": sem_seg_mask.shape[-1],
             }
         )
     assert len(ret), f"No images found in {image_dir}!"

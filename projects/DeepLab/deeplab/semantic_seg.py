@@ -8,6 +8,7 @@ from torch.nn import functional as F
 from detectron2.config import configurable
 from detectron2.layers import ASPP, Conv2d, DepthwiseSeparableConv2d, ShapeSpec, get_norm
 from detectron2.modeling import SEM_SEG_HEADS_REGISTRY
+# from detectron2.utils import comm
 
 from .loss import DeepLabCE
 
@@ -343,6 +344,8 @@ class DeepLabV3Head(nn.Module):
         predictions = F.interpolate(
             predictions, scale_factor=self.common_stride, mode="bilinear", align_corners=False
         )
+        # print("rank:", comm.get_rank(), "loss before:", predictions.size(), targets.size())
         loss = self.loss(predictions, targets)
+        # print("loss after:", predictions.size(), targets.size())
         losses = {"loss_sem_seg": loss * self.loss_weight}
         return losses
