@@ -15,6 +15,7 @@ import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
 from detectron2.data import DatasetMapper, MetadataCatalog, build_detection_train_loader
+from detectron2.data import build_detection_test_loader
 from detectron2.engine import (
     DefaultTrainer,
     default_argument_parser,
@@ -26,28 +27,12 @@ from detectron2.evaluation import (
     DatasetEvaluators,
     SemSegEvaluator,
 )
+
 from detectron2.projects.deeplab import add_deeplab_config, build_lr_scheduler
+from detectron2.projects.deeplab import FixedSizeCrop
 
 
-def checkpoint2model(checkpoint):
-    state_dict = {}
-    for k in checkpoint["state_dict"].keys():
-        if "model." in k:
-            state_dict[k.replace("model.", "")] = checkpoint["state_dict"][k]
-    return state_dict
-
-
-def partial_load(model, state_dict):
-    model_dict = model.state_dict()
-    state_dict = {k: v for k, v in state_dict.items() if k in model_dict.keys()}
-    print("# of match keys for state dict:", len(list(state_dict.keys())))
-    # print("match keys:", list(state_dict.keys()))
-    model_dict.update(state_dict)
-    model.load_state_dict(model_dict)
-    return model
-
-
-def build_sem_seg_train_aug(cfg):
+def build_sem_seg_train_aug(cfg, ignore_label=None):
     augs = [
         T.ResizeShortestEdge(
             cfg.INPUT.MIN_SIZE_TRAIN,
@@ -56,6 +41,8 @@ def build_sem_seg_train_aug(cfg):
         )
     ]
     if cfg.INPUT.CROP.ENABLED:
+        if cfg.INPUT.CROP.FIXED:
+            augs.append(FixedSizeCrop(cfg.INPUT.CROP.SIZE, True, cfg.PIXEL_MEAN, ignore_label))
         augs.append(
             T.RandomCrop_CategoryAreaConstraint(
                 cfg.INPUT.CROP.TYPE,
@@ -64,8 +51,20 @@ def build_sem_seg_train_aug(cfg):
                 cfg.MODEL.SEM_SEG_HEAD.IGNORE_VALUE,
             )
         )
-    if cfg.INPUT.FLIP_ENABLED:
+    if cfg.INPUT.FLIP.ENABLED:
         augs.append(T.RandomFlip())
+    return augs
+
+
+def build_sem_seg_test_bdd_aug(cfg, ignore_label):
+    augs = [
+        T.ResizeShortestEdge(
+            cfg.INPUT.MIN_SIZE_TEST,
+            cfg.INPUT.MAX_SIZE_TEST,
+            cfg.INPUT.MIN_SIZE_TEST_SAMPLING,
+        ),
+        FixedSizeCrop(cfg.INPUT.TEST_SIZE, True, 0.0, ignore_label)
+    ]
     return augs
 
 
@@ -112,13 +111,25 @@ class Trainer(DefaultTrainer):
 
     @classmethod
     def build_train_loader(cls, cfg):
+        ignore_label = MetadataCatalog.get(cfg.DATASETS.TRAIN).ignore_label
         if "SemanticSegmentor" in cfg.MODEL.META_ARCHITECTURE:
             mapper = DatasetMapper(
-                cfg, is_train=True, augmentations=build_sem_seg_train_aug(cfg)
+                cfg, is_train=True, augmentations=build_sem_seg_train_aug(cfg, ignore_label)
             )
         else:
             mapper = None
         return build_detection_train_loader(cfg, mapper=mapper)
+
+    @classmethod
+    def build_test_loader(cls, cfg, dataset_name):
+        if cfg.INPUT.CROP.FIXED:
+            ignore_label = MetadataCatalog.get(dataset_name).ignore_label
+            mapper = DatasetMapper(
+                cfg, is_train=False, augmentations=build_sem_seg_test_bdd_aug(cfg, ignore_label)
+            )
+            return build_detection_test_loader(cfg, dataset_name, mapper=mapper)
+        else:
+            return super().build_test_loader(cfg, dataset_name)
 
     @classmethod
     def build_lr_scheduler(cls, cfg, optimizer):
@@ -142,7 +153,6 @@ def setup(args):
         cfg.MODEL.WEIGHTS = args.model_path
     if args.no_finetune:
         cfg.MODEL.BACKBONE.FREEZE_AT = 5
-    cfg.INPUT.FLIP_ENABLED = args.use_flip
     cfg.freeze()
     default_setup(cfg, args)
     return cfg
@@ -169,7 +179,6 @@ if __name__ == "__main__":
     parser.add_argument("--output", default="./output")
     parser.add_argument("--model_path", default="")
     parser.add_argument("--no_finetune", action="store_true")
-    parser.add_argument("--use_flip", action="store_true")
     args = parser.parse_args()
     print("Command Line Args:", args)
     launch(
