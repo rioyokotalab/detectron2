@@ -96,8 +96,8 @@ def load_bdd100k_semantic(image_dir, mask_dir):
                 "file_name": image_file,
                 "image_id": os.path.basename(image_file),
                 "sem_seg_file_name": mask_file,
-                "height": sem_seg_mask.shape[-2],
-                "width": sem_seg_mask.shape[-1],
+                "height": h,
+                "width": w,
             }
         )
     assert len(ret), f"No images found in {image_dir}!"
