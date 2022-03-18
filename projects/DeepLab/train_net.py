@@ -111,7 +111,7 @@ class Trainer(DefaultTrainer):
 
     @classmethod
     def build_train_loader(cls, cfg):
-        ignore_label = MetadataCatalog.get(cfg.DATASETS.TRAIN).ignore_label
+        ignore_label = MetadataCatalog.get(cfg.DATASETS.TRAIN[0]).ignore_label
         if "SemanticSegmentor" in cfg.MODEL.META_ARCHITECTURE:
             mapper = DatasetMapper(
                 cfg, is_train=True, augmentations=build_sem_seg_train_aug(cfg, ignore_label)
