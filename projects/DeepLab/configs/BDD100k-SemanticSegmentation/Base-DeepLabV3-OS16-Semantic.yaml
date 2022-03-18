@@ -1,6 +1,8 @@
 _BASE_: "../../../../configs/Base-RCNN-DilatedC5.yaml"
 MODEL:
   META_ARCHITECTURE: "SemanticSegmentor"
+  PIXEL_MEAN: [73, 83, 72]
+  PIXEL_STD: [47.67, 48.49, 47.74]
   BACKBONE:
     FREEZE_AT: 0
   SEM_SEG_HEAD:
@@ -27,10 +29,12 @@ INPUT:
   MIN_SIZE_TEST: 1024
   MAX_SIZE_TRAIN: 4096
   MAX_SIZE_TEST: 2048
+  TEST_SIZE: (1024, 2048)
   CROP:
     ENABLED: True
-    TYPE: "absolute"
+    TYPE: "fixed"
     SIZE: (512, 1024)
-    SINGLE_CATEGORY_MAX_AREA: 1.0
+  FLIP:
+    ENABLED: False
 DATALOADER:
   NUM_WORKERS: 10
