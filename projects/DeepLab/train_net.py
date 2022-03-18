@@ -42,7 +42,11 @@ def build_sem_seg_train_aug(cfg, ignore_label=None):
     ]
     if cfg.INPUT.CROP.ENABLED:
         if cfg.INPUT.CROP.FIXED:
-            augs.append(FixedSizeCrop(cfg.INPUT.CROP.SIZE, True, cfg.PIXEL_MEAN, ignore_label))
+            augs.append(
+                FixedSizeCrop(
+                    cfg.INPUT.CROP.SIZE, True, cfg.MODEL.PIXEL_MEAN, ignore_label
+                )
+            )
         augs.append(
             T.RandomCrop_CategoryAreaConstraint(
                 cfg.INPUT.CROP.TYPE,
@@ -63,7 +67,7 @@ def build_sem_seg_test_bdd_aug(cfg, ignore_label):
             cfg.INPUT.MAX_SIZE_TEST,
             cfg.INPUT.MIN_SIZE_TEST_SAMPLING,
         ),
-        FixedSizeCrop(cfg.INPUT.TEST_SIZE, True, 0.0, ignore_label)
+        FixedSizeCrop(cfg.INPUT.TEST_SIZE, True, 0.0, ignore_label),
     ]
     return augs
 
@@ -114,7 +118,9 @@ class Trainer(DefaultTrainer):
         ignore_label = MetadataCatalog.get(cfg.DATASETS.TRAIN[0]).ignore_label
         if "SemanticSegmentor" in cfg.MODEL.META_ARCHITECTURE:
             mapper = DatasetMapper(
-                cfg, is_train=True, augmentations=build_sem_seg_train_aug(cfg, ignore_label)
+                cfg,
+                is_train=True,
+                augmentations=build_sem_seg_train_aug(cfg, ignore_label),
             )
         else:
             mapper = None
@@ -125,7 +131,9 @@ class Trainer(DefaultTrainer):
         if cfg.INPUT.CROP.FIXED:
             ignore_label = MetadataCatalog.get(dataset_name).ignore_label
             mapper = DatasetMapper(
-                cfg, is_train=False, augmentations=build_sem_seg_test_bdd_aug(cfg, ignore_label)
+                cfg,
+                is_train=False,
+                augmentations=build_sem_seg_test_bdd_aug(cfg, ignore_label),
             )
             return build_detection_test_loader(cfg, dataset_name, mapper=mapper)
         else:
