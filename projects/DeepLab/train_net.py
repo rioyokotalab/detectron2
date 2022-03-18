@@ -44,7 +44,7 @@ def build_sem_seg_train_aug(cfg, ignore_label=None):
         if cfg.INPUT.CROP.FIXED:
             augs.append(
                 FixedSizeCrop(
-                    cfg.INPUT.CROP.SIZE, True, cfg.MODEL.PIXEL_MEAN, ignore_label
+                    cfg.INPUT.CROP.SIZE, True, cfg.MODEL.PIXEL_MEAN[0], ignore_label
                 )
             )
         augs.append(
