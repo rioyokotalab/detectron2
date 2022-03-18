@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates.
 
+from detectron2.config.config import CfgNode
+
 
 def add_deeplab_config(cfg):
     """
@@ -8,7 +10,12 @@ def add_deeplab_config(cfg):
     """
     # We retry random cropping until no single category in semantic segmentation GT occupies more
     # than `SINGLE_CATEGORY_MAX_AREA` part of the crop.
+    cfg.INPUT.CROP.FIXED = False
     cfg.INPUT.CROP.SINGLE_CATEGORY_MAX_AREA = 1.0
+    cfg.INPUT.MIN_SIZE_TEST_SAMPLING = "choice"
+    cfg.INPUT.TEST_SIZE = (1024, 2048)
+    cfg.INPUT.FLIP = CfgNode()
+    cfg.INPUT.FLIP.ENABLED = True
     # Used for `poly` learning rate schedule.
     cfg.SOLVER.POLY_LR_POWER = 0.9
     cfg.SOLVER.POLY_LR_CONSTANT_ENDING = 0.0
