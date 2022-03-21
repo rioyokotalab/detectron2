@@ -11,7 +11,7 @@ from detectron2.data import MetadataCatalog
 from detectron2.utils import comm
 from detectron2.utils.file_io import PathManager
 
-from detectron2.evaluation.evaluator import CityscapesEvaluator as BaseEvaluator
+from detectron2.evaluation import CityscapesEvaluator as BaseEvaluator
 
 
 class CityscapesEvaluator(BaseEvaluator):

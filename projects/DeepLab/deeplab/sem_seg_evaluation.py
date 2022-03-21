@@ -4,7 +4,7 @@ import os
 import PIL.Image as Image
 
 from detectron2.utils.file_io import PathManager
-from detectron2.evaluation.evaluator import SemSegEvaluator as BaseEvaluator
+from detectron2.evaluation import SemSegEvaluator as BaseEvaluator
 
 
 class SemSegEvaluator(BaseEvaluator):
