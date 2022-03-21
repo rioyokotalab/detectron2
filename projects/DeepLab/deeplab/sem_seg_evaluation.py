@@ -12,9 +12,31 @@ class SemSegEvaluator(BaseEvaluator):
     Evaluate semantic segmentation metrics.
     """
 
+    def __init__(
+        self,
+        dataset_name,
+        distributed=True,
+        output_dir=None,
+        *,
+        num_classes=None,
+        ignore_label=None,
+    ):
+        super().__init__(
+            dataset_name,
+            distributed,
+            output_dir,
+            num_classes=num_classes,
+            ignore_label=ignore_label,
+        )
+        self._reset_num = 0
+
     def reset(self):
         super().reset()
-        PathManager.mkdirs(self._output_dir)
+        suffix = f"sem_seg_{self._reset_num}"
+        self._working_dir = os.path.join(self._output_dir, f"{suffix}")
+        PathManager.mkdirs(self._working_dir)
+        self._logger.info(f"call reset, and mkdir {self._working_dir}")
+        self._reset_num += 1
 
     def process(self, inputs, outputs):
         """
@@ -43,6 +65,6 @@ class SemSegEvaluator(BaseEvaluator):
             self._predictions.extend(self.encode_json_sem_seg(pred, input["file_name"]))
             file_name = os.path.basename(input["file_name"])
             file_name = os.path.splitext(file_name)[0]
-            file_path = os.path.join(self._output_dir, f"{file_name}_sem_seg.png")
-            print(file_path, pred.shape, pred.dtype)
+            file_path = os.path.join(self._working_dir, f"{file_name}_sem_seg.png")
+            # print(file_path, pred.shape, pred.dtype)
             Image.fromarray(pred.astype(np.uint8)).save(file_path)

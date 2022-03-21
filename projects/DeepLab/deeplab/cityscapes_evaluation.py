@@ -30,9 +30,11 @@ class CityscapesEvaluator(BaseEvaluator):
         self._cpu_device = torch.device("cpu")
         self._logger = logging.getLogger(__name__)
         self._output_dir = output_dir
+        self._reset_num = 0
 
     def reset(self):
-        self._working_dir = os.path.join(self._output_dir, "cityscapes_eval")
+        suffix = f"cityscapes_eval_{self._reset_num}"
+        self._working_dir = os.path.join(self._output_dir, f"{suffix}")
         self._temp_dir = self._working_dir
         PathManager.mkdirs(self._working_dir)
         # All workers will write to the same results directory
@@ -46,6 +48,7 @@ class CityscapesEvaluator(BaseEvaluator):
         self._logger.info(
             "Writing cityscapes results to temporary directory {} ...".format(self._temp_dir)
         )
+        self._reset_num += 1
 
 
 class CityscapesInstanceEvaluator(CityscapesEvaluator):
