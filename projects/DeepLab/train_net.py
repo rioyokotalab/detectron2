@@ -22,14 +22,11 @@ from detectron2.engine import (
     default_setup,
     launch,
 )
-from detectron2.evaluation import (
-    CityscapesSemSegEvaluator,
-    DatasetEvaluators,
-    SemSegEvaluator,
-)
+from detectron2.evaluation import DatasetEvaluators
 
-from detectron2.projects.deeplab import add_deeplab_config, build_lr_scheduler
-from detectron2.projects.deeplab import FixedSizeCrop
+from .deeplab import add_deeplab_config, build_lr_scheduler
+from .deeplab import FixedSizeCrop
+from .deeplab import SemSegEvaluator, CityscapesSemSegEvaluator
 
 
 def build_sem_seg_train_aug(cfg, ignore_label=None):
@@ -102,7 +99,7 @@ class Trainer(DefaultTrainer):
             assert (
                 torch.cuda.device_count() > comm.get_rank()
             ), "CityscapesEvaluator currently do not work with multiple machines."
-            return CityscapesSemSegEvaluator(dataset_name)
+            return CityscapesSemSegEvaluator(dataset_name, output_dir=output_folder)
         if len(evaluator_list) == 0:
             raise NotImplementedError(
                 "no Evaluator for the dataset {} with the type {}".format(
