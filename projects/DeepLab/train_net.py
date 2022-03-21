@@ -24,9 +24,9 @@ from detectron2.engine import (
 )
 from detectron2.evaluation import DatasetEvaluators
 
-from .deeplab import add_deeplab_config, build_lr_scheduler
-from .deeplab import FixedSizeCrop
-from .deeplab import SemSegEvaluator, CityscapesSemSegEvaluator
+from detectron2.project.deeplab import add_deeplab_config, build_lr_scheduler
+from detectron2.project.deeplab import FixedSizeCrop
+from detectron2.project.deeplab import SemSegEvaluator, CityscapesSemSegEvaluator
 
 
 def build_sem_seg_train_aug(cfg, ignore_label=None):
