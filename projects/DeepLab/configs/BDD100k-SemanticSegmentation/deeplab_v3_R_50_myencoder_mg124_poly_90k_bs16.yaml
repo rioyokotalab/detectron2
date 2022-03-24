@@ -2,8 +2,10 @@ _BASE_: Base-DeepLabV3-myencoder-Semantic.yaml
 MODEL:
   # WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
   # WEIGHTS: "detectron2://ImageNetPretrained/torchvision/R-50.pkl"
-  PIXEL_MEAN: [0.0, 0.0, 0.0]
-  PIXEL_STD: [1.0, 1.0, 1.0]
+  # PIXEL_MEAN: [123.675, 116.280, 103.530]
+  # PIXEL_STD: [58.395, 57.120, 57.375]
+  # PIXEL_MEAN: [73.0, 83.0, 72.0]
+  # PIXEL_STD: [47.67, 48.49, 47.74]
   BACKBONE:
     NAME: "build_resnet_deeplab_backbone"
   RESNETS:
