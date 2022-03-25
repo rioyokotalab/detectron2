@@ -64,7 +64,8 @@ def build_sem_seg_test_bdd_aug(cfg, ignore_label):
             cfg.INPUT.MAX_SIZE_TEST,
             cfg.INPUT.MIN_SIZE_TEST_SAMPLING,
         ),
-        FixedSizeCrop(cfg.INPUT.TEST_SIZE, True, 0.0, ignore_label),
+        # FixedSizeCrop(cfg.INPUT.TEST_SIZE, True, 0.0, ignore_label),
+        T.Resize(cfg.INPUT.TEST_SIZE),
     ]
     return augs
 
