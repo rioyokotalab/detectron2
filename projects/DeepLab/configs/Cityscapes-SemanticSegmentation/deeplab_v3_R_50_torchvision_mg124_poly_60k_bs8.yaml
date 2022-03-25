@@ -17,9 +17,6 @@ MODEL:
     NAME: "DeepLabV3Head"
     NORM: "SyncBN"
 SOLVER:
-  BASE_LR: 0.02
   MAX_ITER: 60000
-  LR_SCHEDULER_NAME: "WarmupPolyLR"
-  IMS_PER_BATCH: 8 
 INPUT:
   FORMAT: "RGB"
