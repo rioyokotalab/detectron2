@@ -159,6 +159,8 @@ def setup(args):
         cfg.MODEL.WEIGHTS = args.model_path
     if args.no_finetune:
         cfg.MODEL.BACKBONE.FREEZE_AT = 5
+    if "bdd100k" not in cfg.DATASETS.TRAIN[0]:
+        cfg.INPUT.FLIP.ENABLED = not args.no_flip
     cfg.freeze()
     default_setup(cfg, args)
     return cfg
@@ -185,6 +187,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", default="./output")
     parser.add_argument("--model_path", default="")
     parser.add_argument("--no_finetune", action="store_true")
+    parser.add_argument("--no_flip", action="store_true")
     args = parser.parse_args()
     print("Command Line Args:", args)
     launch(
