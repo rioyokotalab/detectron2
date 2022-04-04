@@ -33,6 +33,7 @@ def change_layername(key):
             num_layer = int(local_key[len_layer:]) + 1
             res_key += f"{num_layer}"
             return key.replace(local_key, res_key)
+    return key
 
 
 def change_downsamplename(key):
@@ -47,6 +48,7 @@ def change_downsamplename(key):
             if num_downsample == 1:
                 shortcur_key += ".norm"
             return key.replace(old_replace_name, shortcur_key)
+    return key
 
 
 def checkpoint2detectron(checkpoint):
