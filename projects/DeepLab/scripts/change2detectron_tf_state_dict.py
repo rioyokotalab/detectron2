@@ -3,6 +3,7 @@ import os
 import pickle
 
 import torch
+import numpy as np
 
 
 def flatten_dict(d, pre_lst=None, result=None):
@@ -118,7 +119,7 @@ def change_convname(key):
     return key
 
 
-def checkpoint2detectron(checkpoint):
+def checkpointkey2detectron(checkpoint):
     checkpoint_model_dict = preprocess_dict(checkpoint)
     tmp = [k for k in checkpoint_model_dict if "res" in k]
     print(len(tmp))
@@ -141,6 +142,33 @@ def checkpoint2detectron(checkpoint):
             # print(len(state_dict["model"].keys()))
     print(len(state_dict["model"].keys()))
     return state_dict
+
+
+def haiku_value2torch(model_state_dict):
+    state_dict = {}
+    for k, v in model_state_dict.items():
+        ndim = v.ndim
+        old_dim_order = list(range(ndim))
+        new_dim_order = old_dim_order[::-1]
+        new_v = v.transpose(new_dim_order)
+        if "norm" in k:
+            old_shape = v.shape
+            mul_all = np.prod(old_shape)
+            # print(k, v.shape, new_v.shape, mul_all)
+            if mul_all in old_shape:
+                new_v = new_v.reshape(-1)
+            # print(k, v.shape, new_v.shape, mul_all)
+        # print(k, v.shape, v.ndim, new_dim_order)
+        # print(k, v.shape, new_v.shape)
+        state_dict[k] = new_v
+    return state_dict
+
+
+def checkpoint2detectron(checkpoint):
+    rename_key_checkpoint = checkpointkey2detectron(checkpoint)
+    state_dict = haiku_value2torch(rename_key_checkpoint["model"])
+    rename_key_checkpoint["model"] = state_dict
+    return rename_key_checkpoint
 
 
 def main(args):
