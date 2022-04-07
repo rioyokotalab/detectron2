@@ -23,9 +23,14 @@ def flatten_dict(d, pre_lst=None, result=None):
     return result
 
 
-def preprocess_dict(checkpoint):
+def preprocess_dict(checkpoint, k_num=0):
     out = {}
-    key = list(checkpoint.keys())[0]
+    keys_list = list(checkpoint.keys())
+    len_key = len(keys_list)
+    if len_key <= k_num or k_num < 0:
+        k_num = 0
+    key = keys_list[k_num]
+    print("output params key:", key)
     for k, v in checkpoint[key].items():
         tmp_k = k.replace("~", "")
         tmp_k = tmp_k.replace("//", "/")
