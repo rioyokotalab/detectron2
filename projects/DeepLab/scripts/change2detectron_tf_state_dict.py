@@ -148,8 +148,12 @@ def haiku_value2torch(model_state_dict):
     state_dict = {}
     for k, v in model_state_dict.items():
         ndim = v.ndim
-        old_dim_order = list(range(ndim))
-        new_dim_order = old_dim_order[::-1]
+        if ndim != 4:
+            state_dict[k] = v
+            continue
+        # old_dim_order = list(range(ndim))
+        # new_dim_order = old_dim_order[::-1]
+        new_dim_order = [3, 2, 0, 1]
         new_v = v.transpose(new_dim_order)
         if "norm" in k:
             old_shape = v.shape

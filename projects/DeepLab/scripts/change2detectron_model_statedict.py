@@ -73,6 +73,12 @@ def checkpoint2detectron(checkpoint):
     return state_dict
 
 
+def no_change(checkpoint):
+    state_dict = {"__author__": "tomo", "matching_heuristics": True}
+    state_dict["model"] = checkpoint["state_dict"]
+    return state_dict
+
+
 if __name__ == "__main__":
     ext_torch_list = [".pth", ".pth.tar", ".pyth"]
     ext_pickle_list = [".pkl", ".binaryfile"]
@@ -82,6 +88,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_path", default="")
     parser.add_argument("--out_path", default="./output/new_checkpoint")
     parser.add_argument("--ext", default=".pth", choices=ext_list)
+    parser.add_argument("--no_change", action="store_true")
     args = parser.parse_args()
 
     pretrain_encoder_path = args.model_path
@@ -89,7 +96,10 @@ if __name__ == "__main__":
     os.makedirs(out_path, exist_ok=True)
 
     checkpoint = torch.load(pretrain_encoder_path, map_location="cpu")
-    checkpoint = checkpoint2detectron(checkpoint)
+    if args.no_change:
+        checkpoint = no_change(checkpoint)
+    else:
+        checkpoint = checkpoint2detectron(checkpoint)
 
     filename_pth_tar = os.path.basename(pretrain_encoder_path)
     dirname, basename = os.path.split(filename_pth_tar)
