@@ -124,8 +124,8 @@ def change_convname(key):
     return key
 
 
-def checkpointkey2detectron(checkpoint):
-    checkpoint_model_dict = preprocess_dict(checkpoint)
+def checkpointkey2detectron(checkpoint, k_num=0):
+    checkpoint_model_dict = preprocess_dict(checkpoint, k_num=k_num)
     tmp = [k for k in checkpoint_model_dict if "res" in k]
     print(len(tmp))
     state_dict = {"__author__": "tomo", "matching_heuristics": True}
@@ -173,8 +173,8 @@ def haiku_value2torch(model_state_dict):
     return state_dict
 
 
-def checkpoint2detectron(checkpoint):
-    rename_key_checkpoint = checkpointkey2detectron(checkpoint)
+def checkpoint2detectron(checkpoint, k_num=0):
+    rename_key_checkpoint = checkpointkey2detectron(checkpoint, k_num=k_num)
     state_dict = haiku_value2torch(rename_key_checkpoint["model"])
     rename_key_checkpoint["model"] = state_dict
     return rename_key_checkpoint
@@ -188,7 +188,7 @@ def main(args):
     with open(pretrain_encoder_path, "rb") as f:
         data = pickle.load(f)
     model_state_dict = data[list(data.keys())[0]]
-    checkpoint = checkpoint2detectron(model_state_dict)
+    checkpoint = checkpoint2detectron(model_state_dict, k_num=args.k_num)
 
     filename_pth_tar = os.path.basename(pretrain_encoder_path)
     dirname, basename = os.path.split(filename_pth_tar)
@@ -215,6 +215,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_path", default="")
     parser.add_argument("--out_path", default="./output/new_checkpoint")
+    parser.add_argument("--k_num", default=0, type=int)
     parser.add_argument("--ext", default=".pth", choices=ext_list)
     args = parser.parse_args()
     main(args)
