@@ -31,11 +31,11 @@ if __name__ == "__main__":
     dirname, basename = os.path.split(out_basename)
     basename_without_ext, ext = basename.split(".", 1)
     path_without_ext = os.path.join(dirname, basename_without_ext)
-    print(path_without_ext)
+    save_ext = "." + ext
+    print(path_without_ext, save_ext)
     print("save as:", out_path)
-    new_checkpoint_file_path = out_path
-    if ext in ext_torch_list:
-        torch.save(checkpoint, new_checkpoint_file_path)
-    elif ext in ext_pickle_list:
-        with open(new_checkpoint_file_path, "wb") as f:
+    if save_ext in ext_torch_list:
+        torch.save(checkpoint, out_path)
+    elif save_ext in ext_pickle_list:
+        with open(out_path, "wb") as f:
             pickle.dump(checkpoint, f)
