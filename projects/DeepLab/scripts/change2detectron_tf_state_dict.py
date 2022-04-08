@@ -149,7 +149,7 @@ def checkpointkey2detectron(checkpoint, k_num=0):
     return state_dict
 
 
-def haiku_value2torch(model_state_dict):
+def haiku_value2torch(model_state_dict, debug=False):
     state_dict = {}
     for k, v in model_state_dict.items():
         ndim = v.ndim
@@ -167,16 +167,21 @@ def haiku_value2torch(model_state_dict):
             if mul_all in old_shape:
                 new_v = new_v.reshape(-1)
             # print(k, v.shape, new_v.shape, mul_all)
-        new_v = new_v.contiguous()
+        if debug:
+            print(k, "before is contiguous?:", new_v.data.contiguous)
+        v_dtype = new_v.dtype
+        new_v = np.ascontiguousarray(new_v, dtype=v_dtype)
+        if debug:
+            print(k, "after is contiguous?:", new_v.data.contiguous)
         # print(k, v.shape, v.ndim, new_dim_order)
         # print(k, v.shape, new_v.shape)
         state_dict[k] = new_v
     return state_dict
 
 
-def checkpoint2detectron(checkpoint, k_num=0):
+def checkpoint2detectron(checkpoint, k_num=0, debug=False):
     rename_key_checkpoint = checkpointkey2detectron(checkpoint, k_num=k_num)
-    state_dict = haiku_value2torch(rename_key_checkpoint["model"])
+    state_dict = haiku_value2torch(rename_key_checkpoint["model"], debug=debug)
     rename_key_checkpoint["model"] = state_dict
     return rename_key_checkpoint
 
@@ -189,7 +194,9 @@ def main(args):
     with open(pretrain_encoder_path, "rb") as f:
         data = pickle.load(f)
     model_state_dict = data[list(data.keys())[0]]
-    checkpoint = checkpoint2detectron(model_state_dict, k_num=args.k_num)
+    checkpoint = checkpoint2detectron(
+        model_state_dict, k_num=args.k_num, debug=args.debug
+    )
 
     filename_pth_tar = os.path.basename(pretrain_encoder_path)
     dirname, basename = os.path.split(filename_pth_tar)
@@ -218,5 +225,6 @@ if __name__ == "__main__":
     parser.add_argument("--out_path", default="./output/new_checkpoint")
     parser.add_argument("--k_num", default=0, type=int)
     parser.add_argument("--ext", default=".pth", choices=ext_list)
+    parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
     main(args)
