@@ -8,7 +8,13 @@ import torch
 def extract_model_state_dict(checkpoint):
     # state_dict = {"__author__": "tomo", "matching_heuristics": True}
     # state_dict["model"] = checkpoint["state_dict"]
-    state_dict = checkpoint["state_dict"]
+    model_state_dict = checkpoint["state_dict"]
+    state_dict = {}
+    for k, v in model_state_dict.items():
+        if "model." in k:
+            state_dict[k.replace("model.", "")] = v
+        else:
+            state_dict[k] = v
     return state_dict
 
 
