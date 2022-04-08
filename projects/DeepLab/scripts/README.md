@@ -6,7 +6,7 @@
 
 ```
 $ git clone https://github.com/chigur/byol-convert
-$ pip install torch==1.4.0+cpu torchvision==0.5.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+$ pip install torch==1.4.0 torchvision==0.5.0
 $ pip install --upgrade "jax[cpu]"
 $ pip install dill
 $ pip install dm-haiku
