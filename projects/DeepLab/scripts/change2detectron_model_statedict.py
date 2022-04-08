@@ -6,8 +6,9 @@ import torch
 
 
 def extract_model_state_dict(checkpoint):
-    state_dict = {"__author__": "tomo", "matching_heuristics": True}
-    state_dict["model"] = checkpoint["state_dict"]
+    # state_dict = {"__author__": "tomo", "matching_heuristics": True}
+    # state_dict["model"] = checkpoint["state_dict"]
+    state_dict = checkpoint["state_dict"]
     return state_dict
 
 
