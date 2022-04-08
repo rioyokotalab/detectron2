@@ -167,6 +167,7 @@ def haiku_value2torch(model_state_dict):
             if mul_all in old_shape:
                 new_v = new_v.reshape(-1)
             # print(k, v.shape, new_v.shape, mul_all)
+        new_v = new_v.contiguous()
         # print(k, v.shape, v.ndim, new_dim_order)
         # print(k, v.shape, new_v.shape)
         state_dict[k] = new_v
