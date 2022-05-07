@@ -1,25 +1,21 @@
 #!/bin/bash
 
-set -e
+set -eu
 
-model_root=$(
+input_dir=$(
     cd "$1" || exit
     pwd
 )
 
-raft_name="$2"
-
-if [ -z "$raft_name" ]; then
-    raft_name="raft-sintel"
+if ! echo "$input_dir" | grep "raw_data" --quiet; then
+  echo "$input_dir is not raw data dir"
+  exit 1
 fi
 
-set -u
-
-input_dir="$model_root/raw_data/$raft_name"
+model_root=${input_dir%%/raw_data*}
+raft_name=${input_dir##*raw_data/}
 middle_dir="$model_root/middle_convert/$raft_name"
 output_dir="$model_root/detectron2/$raft_name"
-
-# echo "$middle_dir" "$output_dir"
 
 middle_ext=".pth"
 out_ext=".pkl"
