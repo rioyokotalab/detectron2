@@ -13,6 +13,13 @@ def extract_model_state_dict(checkpoint):
     for k, v in model_state_dict.items():
         if "model." in k:
             state_dict[k.replace("model.", "")] = v
+        elif "online_encoder." in k:
+            if "projector." in k:
+                continue
+            key = k.replace("learner.", "")
+            key = key.replace("online_encoder.", "")
+            key = key.replace("net.", "")
+            state_dict[key] = v
         else:
             state_dict[k] = v
     return state_dict
