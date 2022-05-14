@@ -52,6 +52,7 @@ do
     middle_filename="$filename_without_ext""$middle_ext"
     middle_filename=${middle_filename//\=/\_}
     out_filename="$filename_without_ext""$out_ext"
+    out_filename=${out_filename//\=/\_}
     # echo "$model_path"
     # echo "$filename_without_ext"
     # echo "$middle_filename"
