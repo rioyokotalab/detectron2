@@ -7,6 +7,16 @@ input_dir=$(
     pwd
 )
 
+set +u
+
+input_ext="$2"
+if [ -z "$input_ext" ]; then
+    input_ext="pth.tar"
+fi
+
+set -u
+
+
 if ! echo "$input_dir" | grep "raw_data" --quiet; then
   echo "$input_dir is not raw data dir"
   exit 1
@@ -32,13 +42,15 @@ mkdir -p "$output_dir"
 
 set +x
 
-models=$(find "$input_dir" -type f -name "*.pth.tar" | sort)
+search_ext="*.$input_ext"
+models=$(find "$input_dir" -type f -name "$search_ext" | sort)
 
 for model_path in ${models};
 do
     filename=$(basename "$model_path")
     filename_without_ext=${filename%%.*}
     middle_filename="$filename_without_ext""$middle_ext"
+    middle_filename=${middle_filename//\=/\_}
     out_filename="$filename_without_ext""$out_ext"
     # echo "$model_path"
     # echo "$filename_without_ext"
