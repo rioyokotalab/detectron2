@@ -10,8 +10,8 @@ out_root=$(
     pwd
 )
 
-target_list=$(find "$out_root" -name "convert_d2_models" -type d | sort)
-# target_list=$(find "$out_root" -name "convert_d2_models" -type d | sort | head -1)
+target_list=$(find "$out_root" -name "model_final.pth" | sort)
+# target_list=$(find "$out_root" -name "model_final.pth" | sort | head -1)
 wandb_project_name=${2:-"detectron2"}
 
 set +x
@@ -22,8 +22,12 @@ echo "$num_target"
 
 pushd "$out_root"
 
-for t_path in ${target_list};
+for t_f_path in ${target_list};
 do
+    t_path="$t_f_path"
+    if [ -f "$t_f_path" ];then
+        t_path=$(dirname "$t_f_path")
+    fi
     wandb_id_list=""
     python "$python_path" --project "$wandb_project_name" --target_path "$t_path" > "wandb_id.log"
     cat "wandb_id.log" >> "wandb_id_all.log"
@@ -43,6 +47,7 @@ do
         local_wandb_id=${local_wandb_id##* }
         local_t_path=${local_t##* }
         local_wandb_id=$(echo ${local_wandb_id} | sed -e "s/[\r\n]\+//g")
+        local_t_path=$(echo ${local_t_path} | sed -e "s/[\r\n]\+//g")
         # echo "$local_wandb_id $local_t_path"
         tf_log=$(find "$local_t_path" -name "events.*")
         if [ -f "$tf_log" ];then
@@ -50,7 +55,7 @@ do
         fi
         wandb_id_list+="$local_wandb_id "
     done
-    python "$python_path" --project "$wandb_project_name" --target_path "$t_path" --upload --ids $wandb_id_list
+    python "$python_path" --project "$wandb_project_name" --target_path "$t_path" --upload --id $wandb_id_list
 done
 
 popd
