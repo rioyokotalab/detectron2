@@ -50,6 +50,8 @@ if __name__ == "__main__":
 
     require_files = ["model_final.pth", ".out", ".txt", "metrics.json", "config.yaml"]
 
+    is_config_save = True
+
     for file_or_dir in file_or_dirs:
         if os.path.isfile(file_or_dir):
             is_require_files = any(w in file_or_dir for w in require_files)
@@ -58,7 +60,9 @@ if __name__ == "__main__":
                 if args.upload:
                     print("save file:", file_or_dir, file=sys.stderr)
                     if "config.yaml" in file_or_dir:
-                        with open(file_or_dir, "r") as f:
-                            config = yaml.safe_load(f)
-                        wandb.config.update(config)
+                        if is_config_save:
+                            with open(file_or_dir, "r") as f:
+                                config = yaml.safe_load(f)
+                            wandb.config.update(config)
+                            is_config_save = False
                     wandb.save(file_or_dir, base_path=root)
