@@ -3,6 +3,7 @@ import os
 import sys
 import glob
 from collections import defaultdict
+import yaml
 
 import wandb
 
@@ -66,6 +67,10 @@ if __name__ == "__main__":
         print("wandb_dir:", dirname)
         for save_file in save_file_list:
             print("save file:", save_file, file=sys.stderr)
+            if "config.yaml" in save_file:
+                with open(save_file, "r") as f:
+                    config = yaml.safe_load(f)
+                wandb.config.update(config)
             wandb.save(save_file, base_path=dirname)
         run.finish()
 
