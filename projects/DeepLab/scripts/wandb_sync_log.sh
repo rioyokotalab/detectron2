@@ -20,12 +20,11 @@ set -x
 
 echo "$num_target"
 
-wandb_id_list=""
-
 pushd "$out_root"
 
 for t_path in ${target_list};
 do
+    wandb_id_list=""
     python "$python_path" --project "$wandb_project_name" --target_path "$t_path" > "wandb_id.log"
     cat "wandb_id.log" >> "wandb_id_all.log"
 
