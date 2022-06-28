@@ -20,6 +20,8 @@ set -x
 
 echo "$num_target"
 
+wandb_id_list=""
+
 pushd "$out_root"
 
 for t_path in ${target_list};
@@ -47,7 +49,9 @@ do
         if [ -f "$tf_log" ];then
             wandb sync -p "$wandb_project_name" --id "$local_wandb_id" "$tf_log" 
         fi
+        wandb_id_list+="$local_wandb_id "
     done
+    python "$python_path" --project "$wandb_project_name" --target_path "$t_path" --upload --ids $wandb_id_list
 done
 
 popd

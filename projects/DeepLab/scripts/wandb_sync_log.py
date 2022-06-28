@@ -28,6 +28,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("--project", default="detectron2")
     parser.add_argument("--target_path", default="")
+    parser.add_argument("--ids", nargs="+", default=None)
+    parser.add_argument("--upload", action="store_true")
     args = parser.parse_args()
 
     root_path = os.path.abspath(args.root_path)
@@ -58,20 +60,23 @@ if __name__ == "__main__":
         # elif os.path.isdir(file_or_dir):
         #     print("dir:", file_or_dir)
 
-    for dirname, save_file_list in save_files.items():
+    for i, (dirname, save_file_list) in enumerate(save_files.items()):
+        wandb_id = None if args.ids is None else args.ids[i]
         local_wandb_name = rename_wandb_name_path(dirname, root_path)
-        run = wandb.init(entity="tomo", project=args.project, name=local_wandb_name)
+        run = wandb.init(entity="tomo", project=args.project, name=local_wandb_name, id=wandb_id)
         wandb_id = run.id
         # wandb_id = local_wandb_name
         print("wandb_id:", wandb_id)
         print("wandb_dir:", dirname)
-        for save_file in save_file_list:
-            print("save file:", save_file, file=sys.stderr)
-            if "config.yaml" in save_file:
-                with open(save_file, "r") as f:
-                    config = yaml.safe_load(f)
-                wandb.config.update(config)
-            wandb.save(save_file, base_path=dirname)
+        if args.upload:
+            wandb.config.update(args)
+            for save_file in save_file_list:
+                print("save file:", save_file, file=sys.stderr)
+                if "config.yaml" in save_file:
+                    with open(save_file, "r") as f:
+                        config = yaml.safe_load(f)
+                    wandb.config.update(config)
+                wandb.save(save_file, base_path=dirname)
         run.finish()
 
     # wandb.save(os.path.join(root, "model_final.pth"), base_path=root)
