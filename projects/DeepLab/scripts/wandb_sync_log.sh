@@ -50,11 +50,19 @@ do
         local_wandb_id=$(echo ${local_wandb_id} | sed -e "s/[\r\n]\+//g")
         local_t_path=$(echo ${local_t_path} | sed -e "s/[\r\n]\+//g")
         # echo "$local_wandb_id $local_t_path"
-        tmp_tf_log=$(find "$local_t_path" -name "events.*")
+        tmp_tf_log=$(find "$local_t_path" -maxdepth 1 -mindepth 1 -name "events.*")
+        tf_num=$(echo "$tmp_tf_log" | wc -l)
         mkdir -p "$local_t_path/tf_logs"
-        cp "$tmp_tf_log" "$local_t_path/tf_logs"
-        tf_log="$local_t_path/tf_logs/$(basename "$tmp_tf_log")"
-        if [ -f "$tf_log" ];then
+        for tmp_tf in ${tmp_tf_log};
+        do
+            cp "$tmp_tf" "$local_t_path/tf_logs"
+        done
+        if [ $tf_num -gt 1 ];then
+            tf_log="$local_t_path/tf_logs"
+        else
+            tf_log="$local_t_path/tf_logs/$(basename "$tmp_tf_log")"
+        fi
+        if [ -e "$tf_log" ];then
             wandb sync -p "$wandb_project_name" --id "$local_wandb_id" "$tf_log" 
         fi
         wandb_id_list+="$local_wandb_id "
