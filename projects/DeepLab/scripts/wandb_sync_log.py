@@ -3,6 +3,7 @@ import os
 import sys
 import glob
 import yaml
+import re
 
 import wandb
 
@@ -19,7 +20,8 @@ def rename_wandb_name_path(path, remove_str):
     wandb_name = wandb_name.replace("/", "_")
     wandb_name = wandb_name.replace("pixpro_base_r50_100ep", "")
     wandb_name = wandb_name.replace("convert_d2_models", "")
-    wandb_name = wandb_name.replace("__", "_")
+    wandb_name = re.sub("([_])\\1{%d,}" % 1, "_", wandb_name)
+    # wandb_name = wandb_name.replace("__", "_")
     wandb_name = wandb_name.rstrip("_")
     wandb_name = wandb_name.lstrip("_")
     return wandb_name
