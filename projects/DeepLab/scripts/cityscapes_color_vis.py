@@ -46,9 +46,10 @@ if __name__ == "__main__":
             path_name = os.path.join(root, ext_str)
             # print(path_name)
             img_paths += glob.glob(path_name, recursive=is_recusive)
+    img_paths = [img_path for img_path in img_paths if "cityscapes" in img_path]
     img_paths = [img_path for img_path in img_paths if "_color" not in img_path]
     img_paths = sorted(img_paths)
-    # print(img_paths)
+    # print(img_paths[0], img_paths[-1])
 
     palette = [
         k.color if k.trainId >= 0 and k.trainId != 255 else (255, 255, 255)
