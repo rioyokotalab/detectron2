@@ -1,0 +1,43 @@
+_BASE_: Base-DeepLabV3-myencoder-Semantic.yaml
+MODEL:
+  # WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+  WEIGHTS: "detectron2://ImageNetPretrained/torchvision/R-50.pkl"
+  # PIXEL_MEAN: [123.675, 116.280, 103.530]
+  # PIXEL_STD: [58.395, 57.120, 57.375]
+  # PIXEL_MEAN: [73.0, 83.0, 72.0]
+  # PIXEL_STD: [47.67, 48.49, 47.74]
+  # BDD100k statics by my code
+  # PIXEL_MEAN: [74.07416829, 74.24816955, 72.66530575]
+  # PIXEL_STD: [67.25061749, 67.2479997,  67.24650803]
+  BACKBONE:
+    NAME: "build_resnet_deeplab_backbone"
+  RESNETS:
+    DEPTH: 50
+    NORM: "SyncBN"
+    RES5_MULTI_GRID: [1, 2, 4]
+    STEM_TYPE: "basic"
+    # STEM_OUT_CHANNELS: 128
+    STRIDE_IN_1X1: False
+  SEM_SEG_HEAD:
+    NAME: "DeepLabV3Head"
+    NORM: "SyncBN"
+SOLVER:
+  MAX_ITER: 60000
+INPUT:
+  FORMAT: "RGB"
+  INIT_SIZE_TRAIN: (2048, 1024)
+  INIT_SIZE_TEST: (2048, 1024)
+  MIN_SIZE_TRAIN: (512, 2048)
+  MIN_SIZE_TRAIN_SAMPLING: "range"
+  MAX_SIZE_TRAIN: 4096
+  MIN_SIZE_TEST: 1024
+  MAX_SIZE_TEST: 2048
+  # TEST_SIZE: (1024, 2048)
+  TEST_SIZE: (2048, 1024)
+  CROP:
+    ENABLED: True
+    # FIXED: True
+    TYPE: "absolute"
+    SIZE: (512, 1024)
+  FLIP:
+    ENABLED: False
