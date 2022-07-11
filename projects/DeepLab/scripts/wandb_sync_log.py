@@ -27,12 +27,27 @@ def rename_wandb_name_path(path, remove_str):
     return wandb_name
 
 
+def get_save_files(root, require_files):
+    file_or_dirs = sorted(glob.glob(f"{root}/**", recursive=True))
+
+    save_files = []
+
+    for file_or_dir in file_or_dirs:
+        if os.path.isfile(file_or_dir):
+            is_require_files = any(w in file_or_dir for w in require_files)
+            if is_require_files:
+                save_files.append(file_or_dir)
+
+    save_files = sorted(save_files)
+    return save_files
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--root_path",
-        default="/home/tomo/ssl_pj/detectron2/projects/DeepLab/output")
+        "--root_path", default="/home/tomo/ssl_pj/detectron2/projects/DeepLab/output"
+    )
     parser.add_argument("--project", default="detectron2")
     parser.add_argument("--entity", default="tomo")
     parser.add_argument("--target_path", default="")
@@ -45,36 +60,30 @@ if __name__ == "__main__":
 
     wandb_name = rename_wandb_name_path(root, root_path)
     wandb_id = args.id
-    run = wandb.init(entity=args.entity,
-                     project=args.project,
-                     name=wandb_name,
-                     id=wandb_id)
+    run = wandb.init(
+        entity=args.entity, project=args.project, name=wandb_name, id=wandb_id
+    )
     wandb_id = run.id
     print("wandb_id:", wandb_id)
     print("wandb_dir:", root)
 
     wandb.config.update(args)
 
-    file_or_dirs = sorted(glob.glob(f"{root}/**", recursive=True))
+    require_files = ["model_final.pth", ".out", ".txt", "metrics.json", "config.yaml"]
 
-    require_files = [
-        "model_final.pth", ".out", ".txt", "metrics.json", "config.yaml"
-    ]
+    save_files = get_save_files(root, require_files)
 
     is_config_save = True
 
-    for file_or_dir in file_or_dirs:
-        if os.path.isfile(file_or_dir):
-            is_require_files = any(w in file_or_dir for w in require_files)
-            is_require_files = is_require_files and not ("events."
-                                                         in file_or_dir)
-            if is_require_files:
-                if args.upload:
-                    print("save file:", file_or_dir, file=sys.stderr)
-                    if "config.yaml" in file_or_dir:
-                        if is_config_save:
-                            with open(file_or_dir, "r") as f:
-                                config = yaml.safe_load(f)
-                            wandb.config.update(config)
-                            is_config_save = False
-                    wandb.save(file_or_dir, base_path=root)
+    for file_or_dir in save_files:
+        is_require_files = not ("events." in file_or_dir)
+        if is_require_files:
+            if args.upload:
+                print("save file:", file_or_dir, file=sys.stderr)
+                if "config.yaml" in file_or_dir:
+                    if is_config_save:
+                        with open(file_or_dir, "r") as f:
+                            config = yaml.safe_load(f)
+                        wandb.config.update(config)
+                        is_config_save = False
+                wandb.save(file_or_dir, base_path=root)
