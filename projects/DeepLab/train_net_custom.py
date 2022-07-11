@@ -7,7 +7,6 @@ This script is a simplified version of the training script in detectron2/tools.
 """
 
 import os
-import sys
 import torch
 import wandb
 

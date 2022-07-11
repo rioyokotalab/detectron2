@@ -9,6 +9,7 @@ This script is a simplified version of the training script in detectron2/tools.
 
 import os
 import torch
+import wandb
 
 import detectron2.data.transforms as T
 import detectron2.utils.comm as comm
@@ -27,6 +28,8 @@ from detectron2.evaluation import DatasetEvaluators
 from detectron2.projects.deeplab import add_deeplab_config, build_lr_scheduler
 from detectron2.projects.deeplab import FixedSizeCrop
 from detectron2.projects.deeplab import CityscapesSemSegEvaluator, SemSegEvaluator
+
+from scripts import wandb_sync_log
 
 
 def build_sem_seg_train_aug(cfg, ignore_label=None):
@@ -165,6 +168,17 @@ def setup(args):
 
 def main(args):
     cfg = setup(args)
+    rank = comm.get_rank()
+    if rank == 0:
+        pwd_path = os.path.join(os.path.dirname(__file__), "output")
+        wandb_name = wandb_sync_log.rename_wandb_name_path(cfg.OUTPUT_DIR, pwd_path)
+        wandb.init(
+            project="detectron2", entity="tomo", name=wandb_name, sync_tensorboard=True
+        )
+        wandb.config.update(cfg)
+        dict_arg = dict(vars(args))
+        config_arg = {"args": dict_arg}
+        wandb.config.update(config_arg)
 
     if args.eval_only:
         model = Trainer.build_model(cfg)
@@ -195,3 +209,13 @@ if __name__ == "__main__":
         dist_url=args.dist_url,
         args=(args,),
     )
+
+    rank = comm.get_rank()
+    if rank == 0:
+        require_files = [".out", ".txt", "metrics.json", "config.yaml"]
+        save_files = wandb_sync_log.get_save_files(args.output, require_files)
+        for f in save_files:
+            if "events." in f:
+                continue
+            wandb.save(f, base_path=args.output)
+        wandb.finish()
