@@ -10,6 +10,7 @@ This script is a simplified version of the training script in detectron2/tools.
 import os
 import torch
 import wandb
+import shutil
 
 import detectron2.data.transforms as T
 import detectron2.utils.comm as comm
@@ -190,7 +191,30 @@ def main(args):
 
     trainer = Trainer(cfg)
     trainer.resume_or_load(resume=args.resume)
-    return trainer.train()
+    out = trainer.train()
+
+    if rank == 0:
+        print("end train, saving..")
+        if args.log_name != "" and args.log_name is not None:
+            abs_log_path = os.path.abspath(args.log_name)
+            log_dirname = os.path.dirname(abs_log_path)
+            base_log, ext_log = os.path.splitext(abs_log_path)[1]
+            if ext_log == ".out":
+                base_log += ".txt"
+                new_logname = os.path.join(args.output, base_log)
+                shutil.copyfile(abs_log_path, new_logname)
+            else:
+                new_logname = os.path.join(args.output, args.log_name)
+                shutil.copyfile(abs_log_path, new_logname)
+        require_files = [".out", ".txt", "metrics.json", "config.yaml"]
+        save_files = wandb_sync_log.get_save_files(args.output, require_files)
+        for f in save_files:
+            if "events." in f:
+                continue
+            wandb.save(f, base_path=args.output)
+        wandb.finish()
+
+    return out
 
 
 if __name__ == "__main__":
@@ -199,6 +223,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_path", default="")
     parser.add_argument("--no_finetune", action="store_true")
     parser.add_argument("--no_flip", action="store_true")
+    parser.add_argument("--log_name", default="")
     args = parser.parse_args()
     print("Command Line Args:", args)
     launch(
@@ -210,12 +235,3 @@ if __name__ == "__main__":
         args=(args,),
     )
 
-    rank = comm.get_rank()
-    if rank == 0:
-        require_files = [".out", ".txt", "metrics.json", "config.yaml"]
-        save_files = wandb_sync_log.get_save_files(args.output, require_files)
-        for f in save_files:
-            if "events." in f:
-                continue
-            wandb.save(f, base_path=args.output)
-        wandb.finish()
