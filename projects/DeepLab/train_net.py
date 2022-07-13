@@ -8,7 +8,6 @@ This script is a simplified version of the training script in detectron2/tools.
 """
 
 import os
-import torch
 import wandb
 import shutil
 
@@ -196,22 +195,27 @@ def main(args):
     if rank == 0:
         print("end train, saving..")
         if args.log_name != "" and args.log_name is not None:
-            abs_log_path = os.path.abspath(args.log_name)
-            log_dirname = os.path.dirname(abs_log_path)
-            base_log, ext_log = os.path.splitext(abs_log_path)[1]
-            if ext_log == ".out":
-                base_log += ".txt"
-                new_logname = os.path.join(args.output, base_log)
-                shutil.copyfile(abs_log_path, new_logname)
-            else:
-                new_logname = os.path.join(args.output, args.log_name)
+            if os.path.isfile(args.log_name):
+                abs_log_path = os.path.abspath(args.log_name)
+                log_base_name = os.path.basename(abs_log_path)
+                ext_log = os.path.splitext(log_base_name)[1]
+                if ext_log != ".txt":
+                    log_base_name += ".txt"
+                new_logname = os.path.join(args.output, log_base_name)
                 shutil.copyfile(abs_log_path, new_logname)
         require_files = [".out", ".txt", "metrics.json", "config.yaml"]
         save_files = wandb_sync_log.get_save_files(args.output, require_files)
         for f in save_files:
             if "events." in f:
                 continue
-            wandb.save(f, base_path=args.output)
+            new_f = f
+            if ".txt" in f or ".out" in f:
+                base_name = os.path.basename(f)
+                ext_log = os.path.splitext(base_name)[1]
+                if ext_log != ".txt":
+                    new_f = f + ".txt"
+                    shutil.copyfile(f, new_f)
+            wandb.save(new_f, base_path=args.output)
         wandb.finish()
 
     return out
@@ -234,4 +238,3 @@ if __name__ == "__main__":
         dist_url=args.dist_url,
         args=(args,),
     )
-
