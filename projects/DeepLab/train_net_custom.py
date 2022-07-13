@@ -7,7 +7,6 @@ This script is a simplified version of the training script in detectron2/tools.
 """
 
 import os
-import torch
 import wandb
 import shutil
 
@@ -203,7 +202,7 @@ def main(args):
                     log_base_name += ".txt"
                 new_logname = os.path.join(args.output, log_base_name)
                 shutil.copyfile(abs_log_path, new_logname)
-        require_files = [".out", ".txt", "metrics.json", "config.yaml"]
+        require_files = [".out", ".txt", ".sh", "metrics.json", "config.yaml"]
         save_files = wandb_sync_log.get_save_files(args.output, require_files)
         for f in save_files:
             if "events." in f:
@@ -238,4 +237,3 @@ if __name__ == "__main__":
         dist_url=args.dist_url,
         args=(args,),
     )
-
