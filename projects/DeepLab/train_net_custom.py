@@ -169,7 +169,8 @@ def main(args):
     cfg = setup(args)
     rank = comm.get_rank()
     if rank == 0:
-        pwd_path = os.path.join(os.path.dirname(__file__), "output")
+        abs_curfilepath = os.path.abspath(__file__)
+        pwd_path = os.path.join(os.path.dirname(abs_curfilepath), "output")
         wandb_name = wandb_sync_log.rename_wandb_name_path(cfg.OUTPUT_DIR, pwd_path)
         wandb.init(
             project="detectron2", entity="tomo", name=wandb_name, sync_tensorboard=True
