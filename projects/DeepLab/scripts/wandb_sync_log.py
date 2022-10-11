@@ -4,6 +4,7 @@ import sys
 import glob
 import yaml
 import re
+import json
 
 import wandb
 
@@ -35,11 +36,35 @@ def get_save_files(root, require_files):
     for file_or_dir in file_or_dirs:
         if os.path.isfile(file_or_dir):
             is_require_files = any(w in file_or_dir for w in require_files)
+            is_require_files = is_require_files and "wandb/" not in file_or_dir
             if is_require_files:
                 save_files.append(file_or_dir)
 
     save_files = sorted(save_files)
     return save_files
+
+
+def log_metrics(metrics_filename, name="after_log"):
+    metrics = []
+    decoder = json.JSONDecoder()
+    with open(metrics_filename, "r") as f:
+        lines = f.readlines()
+    for s in lines:
+        metrics.append(decoder.raw_decode(s))
+
+    log_metrics_list = []
+    for i, m in enumerate(metrics):
+        # print(i, m)
+        # print()
+        for l_m in m[0].keys():
+            if "IoU" in l_m:
+                tmp_m = {}
+                for k, v in m[0].items():
+                    tmp_m[f"{name}/{k}"] = v
+                # log_metrics_list.append(m[0])
+                log_metrics_list.append(tmp_m)
+                break
+    return log_metrics_list
 
 
 if __name__ == "__main__":
@@ -69,7 +94,7 @@ if __name__ == "__main__":
 
     wandb.config.update(args)
 
-    require_files = ["model_final.pth", ".out", ".txt", "metrics.json", "config.yaml"]
+    require_files = [".out", ".txt", "metrics.json", "config.yaml"]
 
     save_files = get_save_files(root, require_files)
 

@@ -173,9 +173,8 @@ def main(args):
         abs_curfilepath = os.path.abspath(__file__)
         pwd_path = os.path.join(os.path.dirname(abs_curfilepath), "output")
         wandb_name = wandb_sync_log.rename_wandb_name_path(cfg.OUTPUT_DIR, pwd_path)
-        wandb.init(
-            project="detectron2", entity="tomo", name=wandb_name, sync_tensorboard=True
-        )
+        wandb.tensorboard.patch(root_logdir=cfg.OUTPUT_DIR)
+        wandb.init(project="detectron2", entity="tomo", name=wandb_name)
         wandb.config.update(cfg)
         dict_arg = dict(vars(args))
         config_arg = {"args": dict_arg}
