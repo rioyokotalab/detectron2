@@ -44,18 +44,33 @@ def get_save_files(root, require_files):
     return save_files
 
 
-def log_metrics(metrics_filename, name="after_log"):
-    metrics = []
+def load_json(metrics_filename, is_dict=True, name="after_log"):
+    is_json_format = True
+    with open(metrics_filename, "r") as f:
+        try:
+            metrics = json.load(f)
+        except json.JSONDecodeError:
+            is_json_format = False
+    if is_json_format:
+        if not is_dict:
+            metrics = [metrics]
+        return metrics
+
+    metrics, key = [], []
     decoder = json.JSONDecoder()
     with open(metrics_filename, "r") as f:
         lines = f.readlines()
-    for s in lines:
+    for i, s in enumerate(lines):
         metrics.append(decoder.raw_decode(s))
+        key.append(i)
 
-    log_metrics_list = []
+    if name == "":
+        if is_dict:
+            metrics = dict(zip(key, metrics))
+        return metrics
+
+    log_metrics_list, key = [], []
     for i, m in enumerate(metrics):
-        # print(i, m)
-        # print()
         for l_m in m[0].keys():
             if "IoU" in l_m:
                 tmp_m = {}
@@ -63,7 +78,10 @@ def log_metrics(metrics_filename, name="after_log"):
                     tmp_m[f"{name}/{k}"] = v
                 # log_metrics_list.append(m[0])
                 log_metrics_list.append(tmp_m)
+                key.append(i)
                 break
+    if is_dict:
+        log_metrics_list = dict(zip(key, log_metrics_list))
     return log_metrics_list
 
 

@@ -179,6 +179,10 @@ def main(args):
         dict_arg = dict(vars(args))
         config_arg = {"args": dict_arg}
         wandb.config.update(config_arg)
+        if args.pretrain_config != "":
+            pretrain_config = wandb_sync_log.load_json(args.pretrain_config, True, "")
+            config_wandb_pretrain = {"pretrin": pretrain_config}
+            wandb.config.update(config_wandb_pretrain)
 
     if args.eval_only:
         model = Trainer.build_model(cfg)
@@ -225,6 +229,7 @@ if __name__ == "__main__":
     parser = default_argument_parser()
     parser.add_argument("--output", default="./output")
     parser.add_argument("--model_path", default="")
+    parser.add_argument("--pretrain_config", default="")
     parser.add_argument("--no_finetune", action="store_true")
     parser.add_argument("--no_flip", action="store_true")
     parser.add_argument("--log_name", default="")
