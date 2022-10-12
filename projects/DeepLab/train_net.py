@@ -196,7 +196,7 @@ def main(args):
     trainer.resume_or_load(resume=args.resume)
     out = trainer.train()
 
-    if rank == 0:
+    if rank == 0 and args.upload_files:
         print("end train, saving..")
         if args.log_name != "" and args.log_name is not None:
             if os.path.isfile(args.log_name):
@@ -220,6 +220,8 @@ def main(args):
                     new_f = f + ".txt"
                     shutil.copyfile(f, new_f)
             wandb.save(new_f, base_path=args.output)
+
+    if rank == 0:
         wandb.finish()
 
     return out
@@ -233,6 +235,7 @@ if __name__ == "__main__":
     parser.add_argument("--no_finetune", action="store_true")
     parser.add_argument("--no_flip", action="store_true")
     parser.add_argument("--log_name", default="")
+    parser.add_argument("--upload_files", action="store_true")
     args = parser.parse_args()
     print("Command Line Args:", args)
     launch(
