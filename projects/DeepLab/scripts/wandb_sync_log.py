@@ -5,6 +5,7 @@ import glob
 import yaml
 import re
 import json
+import shutil
 
 import wandb
 
@@ -119,6 +120,7 @@ if __name__ == "__main__":
     is_config_save = True
 
     for file_or_dir in save_files:
+        l_file_or_dir = file_or_dir
         is_require_files = not ("events." in file_or_dir)
         if is_require_files:
             if args.upload:
@@ -129,4 +131,11 @@ if __name__ == "__main__":
                             config = yaml.safe_load(f)
                         wandb.config.update(config)
                         is_config_save = False
-                wandb.save(file_or_dir, base_path=root)
+                elif ".txt" in file_or_dir or ".out" in file_or_dir:
+                    base_name = os.path.basename(file_or_dir)
+                    ext_log = os.path.splitext(base_name)[1]
+                    if ext_log != ".txt":
+                        new_f = file_or_dir + ".txt"
+                        shutil.copyfile(file_or_dir, new_f)
+                        l_file_or_dir = new_f
+                wandb.save(l_file_or_dir, base_path=root)
