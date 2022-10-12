@@ -28,6 +28,28 @@ def rename_wandb_name_path(path, remove_str):
     wandb_name = wandb_name.lstrip("_")
     return wandb_name
 
+def get_wandb_name(cfg, args):
+    if hasattr(args, "wandb_name"):
+        if args.wandb_name != "" or args.wandb_name is not None:
+            return args.wandb_name
+
+    dataset_name_key = cfg.DATASETS.TRAIN[0]
+    dataset_name = dataset_name_key.split("_")[0]
+    model_head_naem = cfg.MODEL.SEM_SEG_HEAD.NAME
+    resnet_depth = cfg.RESNETS.DEPTH
+    max_iter = cfg.SOLVER.MAX_ITER
+    no_finetune = args.no_finetune
+
+    wandb_name = ""
+    if "pixpro".lower() in args.model_path.lower():
+        wandb_name += "pixpro_"
+    wandb_name += dataset_name
+    wandb_name += f"_R{resnet_depth}"
+    wandb_name += "_no-finetune" if no_finetune else "_finetune"
+    wandb_name += f"_iter-{max_iter}"
+
+    args.wandb_name = wandb_name
+    return wandb_name
 
 def get_save_files(root, require_files):
     file_or_dirs = sorted(glob.glob(f"{root}/**", recursive=True))

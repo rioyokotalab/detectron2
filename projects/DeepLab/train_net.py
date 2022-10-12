@@ -172,7 +172,7 @@ def main(args):
     if rank == 0:
         abs_curfilepath = os.path.abspath(__file__)
         pwd_path = os.path.join(os.path.dirname(abs_curfilepath), "output")
-        wandb_name = wandb_sync_log.rename_wandb_name_path(cfg.OUTPUT_DIR, pwd_path)
+        wandb_name = wandb_sync_log.get_wandb_name(cfg, args)
         wandb.tensorboard.patch(root_logdir=cfg.OUTPUT_DIR)
         wandb.init(project="detectron2", entity="tomo", name=wandb_name)
         wandb.config.update(cfg)
@@ -235,6 +235,7 @@ if __name__ == "__main__":
     parser.add_argument("--no_finetune", action="store_true")
     parser.add_argument("--no_flip", action="store_true")
     parser.add_argument("--log_name", default="")
+    parser.add_argument("--wandb_name", default="")
     parser.add_argument("--upload_files", action="store_true")
     args = parser.parse_args()
     print("Command Line Args:", args)
