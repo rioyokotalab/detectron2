@@ -36,7 +36,7 @@ def get_wandb_name(cfg, args):
     dataset_name_key = cfg.DATASETS.TRAIN[0]
     dataset_name = dataset_name_key.split("_")[0]
     model_head_naem = cfg.MODEL.SEM_SEG_HEAD.NAME
-    resnet_depth = cfg.RESNETS.DEPTH
+    resnet_depth = cfg.MODEL.RESNETS.DEPTH
     max_iter = cfg.SOLVER.MAX_ITER
     no_finetune = args.no_finetune
 
