@@ -30,7 +30,7 @@ def rename_wandb_name_path(path, remove_str):
 
 def get_wandb_name(cfg, args):
     if hasattr(args, "wandb_name"):
-        if args.wandb_name != "" or args.wandb_name is not None:
+        if args.wandb_name is not None and args.wandb_name != "":
             return args.wandb_name
 
     dataset_name_key = cfg.DATASETS.TRAIN[0]
