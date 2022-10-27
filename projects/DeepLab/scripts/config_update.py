@@ -36,9 +36,12 @@ def update_one_run(run):
     print(f"{model_path=}")
     epoch_str = get_epoch_from_path(model_path, all_epoch)
 
+    key_name_str = "cur_epoch_str"
     key_name = "cur_epoch"
-    run.config[key_name] = epoch_str
-    print("update: ", f"{key_name=}, {epoch_str=}")
+    run.config[key_name_str] = epoch_str
+    run.config[key_name] = int(epoch_str)
+    print("update: ", f"{key_name_str=}, {epoch_str=}")
+    print("update: ", f"{key_name=}, {int(epoch_str)=}")
     run.update()
 
 
