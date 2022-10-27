@@ -10,6 +10,7 @@ This script is a simplified version of the training script in detectron2/tools.
 import os
 import wandb
 import shutil
+import re
 
 import detectron2.data.transforms as T
 import detectron2.utils.comm as comm
@@ -170,19 +171,32 @@ def main(args):
     cfg = setup(args)
     rank = comm.get_rank()
     if rank == 0:
-        abs_curfilepath = os.path.abspath(__file__)
-        pwd_path = os.path.join(os.path.dirname(abs_curfilepath), "output")
-        wandb_name = wandb_sync_log.rename_wandb_name_path(cfg.OUTPUT_DIR, pwd_path)
+        wandb_name = wandb_sync_log.get_wandb_name(cfg, args)
         wandb.tensorboard.patch(root_logdir=cfg.OUTPUT_DIR)
         wandb.init(project="detectron2", entity="tomo", name=wandb_name)
         wandb.config.update(cfg)
         dict_arg = dict(vars(args))
         config_arg = {"args": dict_arg}
         wandb.config.update(config_arg)
+        epoch_digit = 4
         if args.pretrain_config != "":
             pretrain_config = wandb_sync_log.load_json(args.pretrain_config, True, "")
             config_wandb_pretrain = {"pretrin": pretrain_config}
             wandb.config.update(config_wandb_pretrain)
+            all_epoch = pretrain_config.get("epochs", None)
+            if all_epoch is not None:
+                epoch_digit = len(str(all_epoch))
+        if args.model_path != "":
+            b_name = os.path.basename(args.model_path)
+            cur_epoch_name = os.path.splitext(b_name)[0]
+            cur_epoch_list = re.findall(r"\d+ep", cur_epoch_name)
+            cur_epoch_tmp = cur_epoch_name
+            if len(cur_epoch_list) > 0:
+                cur_epoch_tmp = cur_epoch_list[0]
+            cur_epoch = re.findall(r"\d+", cur_epoch_tmp)
+            cur_epoch_str = str(cur_epoch).zfill(epoch_digit)
+            cur_epoch_config = {"cur_epoch": cur_epoch_str}
+            wandb.config.update(cur_epoch_config)
 
     if args.eval_only:
         model = Trainer.build_model(cfg)
@@ -196,7 +210,7 @@ def main(args):
     trainer.resume_or_load(resume=args.resume)
     out = trainer.train()
 
-    if rank == 0:
+    if rank == 0 and args.upload_files:
         print("end train, saving..")
         if args.log_name != "" and args.log_name is not None:
             if os.path.isfile(args.log_name):
@@ -220,6 +234,8 @@ def main(args):
                     new_f = f + ".txt"
                     shutil.copyfile(f, new_f)
             wandb.save(new_f, base_path=args.output)
+
+    if rank == 0:
         wandb.finish()
 
     return out
@@ -233,6 +249,8 @@ if __name__ == "__main__":
     parser.add_argument("--no_finetune", action="store_true")
     parser.add_argument("--no_flip", action="store_true")
     parser.add_argument("--log_name", default="")
+    parser.add_argument("--wandb_name", default="")
+    parser.add_argument("--upload_files", action="store_true")
     args = parser.parse_args()
     print("Command Line Args:", args)
     launch(
