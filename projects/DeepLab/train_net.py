@@ -193,7 +193,7 @@ def main(args):
             cur_epoch_tmp = cur_epoch_name
             if len(cur_epoch_list) > 0:
                 cur_epoch_tmp = cur_epoch_list[0]
-            cur_epoch = re.findall(r"\d+", cur_epoch_tmp)
+            cur_epoch = re.findall(r"\d+", cur_epoch_tmp)[0]
             cur_epoch_str = str(cur_epoch).zfill(epoch_digit)
             cur_epoch_config = {"cur_epoch": cur_epoch_str}
             wandb.config.update(cur_epoch_config)
