@@ -7,9 +7,14 @@ Install Detectron2 following [the instructions](https://detectron2.readthedocs.i
 
 (adding instruction by tomo):  
     1. install pytorch[the instruction](https://pytorch.org/)
-    ```bash
-    pip install torch==1.8.2 torchvision==0.9.2 torchaudio==0.8.2 --extra-index-url https://download.pytorch.org/whl/lts/1.8/cu111
-    ```
+    - for cuda 11.1
+        ```bash
+        pip install torch==1.8.2 torchvision==0.9.2 torchaudio==0.8.2 --extra-index-url https://download.pytorch.org/whl/lts/1.8/cu111
+        ```
+    - for cuda 10.2
+        ```bash
+        pip3 install torch==1.8.2 torchvision==0.9.2 torchaudio==0.8.2 --extra-index-url https://download.pytorch.org/whl/lts/1.8/cu102
+        ```
     2. install detectron2
     - if use build from source (if that, please use `train_net.py` for train)
         ```bash
@@ -23,6 +28,10 @@ Install Detectron2 following [the instructions](https://detectron2.readthedocs.i
     3. for cityscapes script install
     ```bash
     pip install git+https://github.com/mcordts/cityscapesScripts.git
+    ```
+    4. install wandb
+    ```bash
+    pip install wandb
     ```
 
 
