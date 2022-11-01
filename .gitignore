@@ -10,6 +10,7 @@ results/
 results_root/
 pretrain_models/
 wandb/
+.d*
 
 # pyenv
 .python-version
