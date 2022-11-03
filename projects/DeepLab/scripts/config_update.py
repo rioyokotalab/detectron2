@@ -47,11 +47,11 @@ def update_one_run(run, conv_d2_name="convert_d2_models",
         f_idx = model_path.rfind(conv_d2_name)
         config_list = []
         if f_idx >= 0:
-            # s_dt_str = os.path.basename(model_path[:f_idx].rstrip("/"))
-            # config_list = glob.glob(os.path.join(model_root,
-            #                                      f"**/{s_dt_str}"))
+            s_dt_str = os.path.basename(model_path[:f_idx].rstrip("/"))
+            config_list = glob.glob(os.path.join(model_root, f"**/{s_dt_str}/config.json"),
+                                    recursive=True)
             # print(s_dt_str, config_list, model_path[:f_idx])
-            config_list = [os.path.join(model_path[:f_idx], "config.json")]
+            # config_list = [os.path.join(model_path[:f_idx], "config.json")]
             # print(config_list)
         if len(config_list) > 0:
             config_file = config_list[0]
