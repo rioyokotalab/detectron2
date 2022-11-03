@@ -67,15 +67,14 @@ def update_one_run(run, conv_d2_name="convert_d2_models",
             print("update: ", f"{pretrain_config_keyname=}, {load_pretrain_config=}")
 
     tmp_epoch_str = config.get("cur_epoch_str", None)
-    if tmp_epoch_str is not None:
+    epoch_str = get_epoch_from_path(model_path, all_epoch)
+    if tmp_epoch_str is not None and epoch_str == tmp_epoch_str:
         if pretrain_config is None or pretrain_config_file == "":
             print("update configs")
             run.update()
         else:
             print("already update")
         return
-
-    epoch_str = get_epoch_from_path(model_path, all_epoch)
 
     key_name_str = "cur_epoch_str"
     key_name = "cur_epoch"
