@@ -10,7 +10,6 @@ This script is a simplified version of the training script in detectron2/tools.
 import os
 import wandb
 import shutil
-import re
 
 import detectron2.data.transforms as T
 import detectron2.utils.comm as comm
@@ -178,23 +177,13 @@ def main(args):
         dict_arg = dict(vars(args))
         config_arg = {"args": dict_arg}
         wandb.config.update(config_arg)
-        epoch_digit = 4
         if args.pretrain_config != "":
             pretrain_config = wandb_sync_log.load_json(args.pretrain_config, True, "")
             config_wandb_pretrain = {"pretrin": pretrain_config}
             wandb.config.update(config_wandb_pretrain)
-            all_epoch = pretrain_config.get("epochs", None)
-            if all_epoch is not None:
-                epoch_digit = len(str(all_epoch))
         if args.model_path != "":
-            b_name = os.path.basename(args.model_path)
-            cur_epoch_name = os.path.splitext(b_name)[0]
-            cur_epoch_list = re.findall(r"\d+ep", cur_epoch_name)
-            cur_epoch_tmp = cur_epoch_name
-            if len(cur_epoch_list) > 0:
-                cur_epoch_tmp = cur_epoch_list[0]
-            cur_epoch = re.findall(r"\d+", cur_epoch_tmp)[0]
-            cur_epoch_str = str(cur_epoch).zfill(epoch_digit)
+            cur_epoch, cur_epoch_str = wandb_sync_log.get_pretrain_epoch(args.model_path,
+                                                                         args.pretrain_config)
             cur_epoch_config = {"cur_epoch_str": cur_epoch_str,
                                 "cur_epoch": int(cur_epoch_str)}
             wandb.config.update(cur_epoch_config)
