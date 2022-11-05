@@ -170,16 +170,17 @@ def main(args):
     cfg = setup(args)
     rank = comm.get_rank()
     if rank == 0:
-        wandb_name = wandb_sync_log.get_wandb_name(cfg, args)
+        pretrain_config = None
+        if args.pretrain_config != "":
+            pretrain_config = wandb_sync_log.load_json(args.pretrain_config, True, "")
+        wandb_name = wandb_sync_log.get_wandb_name(cfg, args, pretrain_config)
         wandb.tensorboard.patch(root_logdir=cfg.OUTPUT_DIR)
         wandb.init(project="detectron2", entity="tomo", name=wandb_name)
         wandb.config.update(cfg)
         dict_arg = dict(vars(args))
         config_arg = {"args": dict_arg}
         wandb.config.update(config_arg)
-        pretrain_config = None
-        if args.pretrain_config != "":
-            pretrain_config = wandb_sync_log.load_json(args.pretrain_config, True, "")
+        if pretrain_config is not None:
             config_wandb_pretrain = {"pretrin": pretrain_config}
             wandb.config.update(config_wandb_pretrain)
         if args.model_path != "":

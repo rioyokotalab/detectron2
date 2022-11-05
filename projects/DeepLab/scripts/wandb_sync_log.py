@@ -30,10 +30,11 @@ def rename_wandb_name_path(path, remove_str):
 
 
 def get_pretrain_epoch(model_path, pretrain_config=None):
-    epoch_digit = 4
-    all_epoch = pretrain_config.get("epochs", None)
-    if all_epoch is not None:
-        epoch_digit = len(str(all_epoch))
+    assert model_path is not None and model_path != ""
+    all_epoch = 1000
+    if isinstance(pretrain_config, dict):
+        all_epoch = pretrain_config.get("epochs", 1000)
+    epoch_digit = len(str(all_epoch))
 
     b_name = os.path.basename(model_path)
     cur_epoch_name = os.path.splitext(b_name)[0]
@@ -46,7 +47,7 @@ def get_pretrain_epoch(model_path, pretrain_config=None):
     return int(cur_epoch_str), cur_epoch_str
 
 
-def get_wandb_name(cfg, args):
+def get_wandb_name(cfg, args, pretrain_config=None):
     if hasattr(args, "wandb_name"):
         if args.wandb_name is not None and args.wandb_name != "":
             return args.wandb_name
@@ -62,7 +63,7 @@ def get_wandb_name(cfg, args):
     if "pixpro".lower() in args.model_path.lower():
         wandb_name += "pixpro_"
     if args.model_path != "":
-        _, cur_epoch_str = get_pretrain_epoch(args.model_path, args.pretrain_config)
+        _, cur_epoch_str = get_pretrain_epoch(args.model_path, pretrain_config)
         wandb_name += f"{cur_epoch_str}ep_"
     wandb_name += dataset_name
     wandb_name += f"_R{resnet_depth}"
