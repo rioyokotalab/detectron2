@@ -177,13 +177,14 @@ def main(args):
         dict_arg = dict(vars(args))
         config_arg = {"args": dict_arg}
         wandb.config.update(config_arg)
+        pretrain_config = None
         if args.pretrain_config != "":
             pretrain_config = wandb_sync_log.load_json(args.pretrain_config, True, "")
             config_wandb_pretrain = {"pretrin": pretrain_config}
             wandb.config.update(config_wandb_pretrain)
         if args.model_path != "":
             cur_epoch, cur_epoch_str = wandb_sync_log.get_pretrain_epoch(args.model_path,
-                                                                         args.pretrain_config)
+                                                                         pretrain_config)
             cur_epoch_config = {"cur_epoch_str": cur_epoch_str,
                                 "cur_epoch": int(cur_epoch_str)}
             wandb.config.update(cur_epoch_config)
