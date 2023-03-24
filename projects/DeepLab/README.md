@@ -6,33 +6,38 @@ In this repository, we implement DeepLabV3 and DeepLabV3+ in Detectron2.
 Install Detectron2 following [the instructions](https://detectron2.readthedocs.io/tutorials/install.html).
 
 (adding instruction by tomo):  
-1. install pytorch[the instruction](https://pytorch.org/)
-- for cuda 11.1
+1. create pyenv virtual env
     ```bash
-    pip install torch==1.8.2 torchvision==0.9.2 torchaudio==0.8.2 --extra-index-url https://download.pytorch.org/whl/lts/1.8/cu111
+    pyenv virtualenv 3.8.6 detectron2-wandb
+    pyenv local detectron2-wandb
     ```
-- for cuda 10.2
+1. install pytorch ([the instruction](https://pytorch.org/))
+    - for cuda 11.1
+        ```bash
+        pip install torch==1.8.2 torchvision==0.9.2 torchaudio==0.8.2 --extra-index-url https://download.pytorch.org/whl/lts/1.8/cu111
+        ```
+    - for cuda 10.2
+        ```bash
+        pip3 install torch==1.8.2 torchvision==0.9.2 torchaudio==0.8.2 --extra-index-url https://download.pytorch.org/whl/lts/1.8/cu102
+        ```
+1. install detectron2
+    - if use build from source (if that, please use `train_net.py` for train)
+        ```bash
+        cd detectron2
+        pip install -e .
+        ```
+    - if use prebuild version (if that, please use `train_net_custom.py` for train)
+        ```bash
+        pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu111/torch1.8/index.html
+        ```
+1. for cityscapes script install
     ```bash
-    pip3 install torch==1.8.2 torchvision==0.9.2 torchaudio==0.8.2 --extra-index-url https://download.pytorch.org/whl/lts/1.8/cu102
+    pip install git+https://github.com/mcordts/cityscapesScripts.git
     ```
-2. install detectron2
-- if use build from source (if that, please use `train_net.py` for train)
+1. install wandb
     ```bash
-    cd detectron2
-    pip install -e .
+    pip install wandb
     ```
-- if use prebuild version (if that, please use `train_net_custom.py` for train)
-    ```bash
-    pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu111/torch1.8/index.html
-    ```
-3. for cityscapes script install
-```bash
-pip install git+https://github.com/mcordts/cityscapesScripts.git
-```
-4. install wandb
-```bash
-pip install wandb
-```
 
 
 ## Training
